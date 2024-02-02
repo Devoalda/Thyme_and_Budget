@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'account',
     'drf_spectacular',
     'drf_spectacular_sidecar',
+    'nutritionValue',
 ]
 
 REST_FRAMEWORK = {

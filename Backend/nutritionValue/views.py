@@ -4,7 +4,7 @@ from rest_framework import viewsets, status, permissions
 from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.response import Response
 
-class NutritionValueViewSet():
+class NutritionValueViewSet(viewsets.ViewSet):
     def create(self, request, *args, **kwargs):
         if request.content_type == 'multipart/form-data':
             pass

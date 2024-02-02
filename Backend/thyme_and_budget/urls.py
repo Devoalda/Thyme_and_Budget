@@ -39,4 +39,4 @@ path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), ] 
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # nutrition value
-path('nutrition/', include('nutrition.urls')),
+path('nutritionValue/', include('nutritionValue.urls')),
