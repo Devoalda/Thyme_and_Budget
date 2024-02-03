@@ -21,7 +21,7 @@ export default function LayoutComponent({ children }) {
             <Content style={{ padding: '0 50px' }}>
                 <div className="site-layout-content">{children}</div>
             </Content>
-            <Footer style={{ textAlign: 'center' }}>Thyme & Budget ©2021 Created by Team 15</Footer>
+            <Footer style={{ textAlign: 'center' }}>Thyme & Budget ©2024 Created by Team 15</Footer>
         </Layout>
     );
 }
