@@ -159,7 +159,7 @@ match DB_ENGINE:
                 'HOST': env.str('DB_HOST', 'localhost'),
                 'PORT': env.str('DB_PORT', '3306'),
                 'OPTIONS': {
-                    'init_command': "SET sql_mode='STRICT_TRANS_TABLES', innodb_strict_mode=1",
+                    'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
                 },
             }
         }
