@@ -116,8 +116,8 @@ const RegistrationForm = () => {
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="default" htmlType="button" style={{ width: '100%' }}>
-                        Cancel
+                    <Button type="default" href={'/login'} htmlType="button" style={{ width: '100%' }}>
+                        Login
                     </Button>
                 </Form.Item>
             </Form>

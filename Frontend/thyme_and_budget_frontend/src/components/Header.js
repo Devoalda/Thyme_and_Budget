@@ -6,12 +6,12 @@ export default function Header() {
         <Breadcrumb>
             <Breadcrumb.Item>Home</Breadcrumb.Item>
             <Breadcrumb.Item>
-                <a href="">Application Center</a>
+                <a href="">Recipes</a>
             </Breadcrumb.Item>
             <Breadcrumb.Item>
-                <a href="">Application List</a>
+                <a href="">Nutrition Values</a>
             </Breadcrumb.Item>
-            <Breadcrumb.Item>An Application</Breadcrumb.Item>
+            <Breadcrumb.Item>Get Meal Plan</Breadcrumb.Item>
         </Breadcrumb>
     );
 }

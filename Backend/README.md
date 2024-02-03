@@ -6,6 +6,7 @@
 # (Optional) Create venv
 `python -m venv venv`
 
+## For Linux
 `source venv/bin/activate`
 
 ## For Windows
