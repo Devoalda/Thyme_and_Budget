@@ -32,11 +32,12 @@ path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name=
 # Recipe
 path('recipe/', include('recipe.urls')),
 
+# nutrition value
+path('nutritionValue/', include('nutritionValue.urls')),
+
 # jwt
 path('account/', include('account.urls')),
 path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
 path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), ] + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-# nutrition value
-path('nutritionValue/', include('nutritionValue.urls')),

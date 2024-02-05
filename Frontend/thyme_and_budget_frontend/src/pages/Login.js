@@ -1,8 +1,10 @@
 import React from 'react';
-import { Form, Input, Button, message } from 'antd';
+import {useNavigate} from 'react-router-dom';
+import {Form, Input, Button, message} from 'antd';
 import axios from "axios";
 
 const Login = () => {
+    const navigate = useNavigate();
     const onFinish = (values) => {
         // Send post request to backend
         axios.post('http://127.0.0.1:8000/api/token/', {
@@ -11,28 +13,30 @@ const Login = () => {
         })
             .then((response) => {
                 setTimeout(() => {
-                    console.log(response);
+                    //console.log(response);
                     // Save tokens to local storage
                     localStorage.setItem('token', response.data.access);
                     localStorage.setItem('refresh', response.data.refresh);
-                    console.log('Token:', response.data.access);
-                    console.log('Refresh:', response.data.refresh);
+                    //console.log('Token:', response.data.access);
+                    //console.log('Refresh:', response.data.refresh);
                 }, 1000);
-
+                // Redirect to home page
+                navigate('/home');
             }, (error) => {
                 console.log(error);
+                message.error('Failed to login. Please try again.');
             });
     };
 
     return (
-        <div style={{ width: '300px', margin: 'auto' }}>
+        <div style={{width: '300px', margin: 'auto'}}>
             <Form
                 name="login"
                 onFinish={onFinish}
-                initialValues={{ remember: true }}
+                initialValues={{remember: true}}
                 scrollToFirstError
             >
-                <h1 style={{ textAlign: 'center' }}>Login</h1>
+                <h1 style={{textAlign: 'center'}}>Login</h1>
 
                 <Form.Item
                     name="username"
@@ -44,7 +48,7 @@ const Login = () => {
                         },
                     ]}
                 >
-                    <Input />
+                    <Input/>
                 </Form.Item>
 
                 <Form.Item
@@ -57,12 +61,17 @@ const Login = () => {
                         },
                     ]}
                 >
-                    <Input.Password />
+                    <Input.Password/>
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
+                    <Button type="primary" htmlType="submit" style={{width: '100%'}}>
                         Login
+                    </Button>
+                </Form.Item>
+                <Form.Item>
+                    <Button type="link" htmlType="button" style={{width: '100%'}} href="/">
+                        Register
                     </Button>
                 </Form.Item>
             </Form>

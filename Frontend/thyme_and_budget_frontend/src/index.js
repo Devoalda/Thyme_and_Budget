@@ -4,19 +4,33 @@ import './index.css';
 // import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
+// import layout
+import Layout from "./components/Layout";
 // import pages
 import Registration from "./pages/Registration";
 import Login from "./pages/Login";
+import Home from "./pages/Home";
+
+// default error page
+import Error from "./pages/Error";
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  // <React.StrictMode>
-  //   <App />
-  // </React.StrictMode>
+    // <React.StrictMode>
+    //   <App />
+    // </React.StrictMode>
     <Router>
         <Routes>
-        <Route path="/" element={<Registration />} />
-        <Route path="/login" element={<Login />} />
+            <Route path="/" element={<Registration/>}/>
+            <Route path="/login" element={<Login/>}/>
+            <Route path="/home" element={
+                <Layout>
+                    <Home/>
+                </Layout>
+            }
+            />
+            <Route path="*" element={<Error/>}/>
         </Routes>
     </Router>
 );
