@@ -1,34 +1,65 @@
-> [NOTE] Commands may differ depending on OS
+# Backend
 
-# Cd to project
-`cd Backend`
+This is the backend of our application, built with Django. It provides a set of RESTful APIs for managing recipes.
 
-# (Optional) Create venv
-`python -m venv venv`
+## Getting Started
 
-`source venv/bin/activate`
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-## For Windows
-`venv\Scripts\activate`
+### Prerequisites
 
-# Install libraries if not done so
-`pip3 install -r requirements.txt`
+- Python 3.8 or higher
+- pip
 
-# Run migrations
-`python manage.py migrate`
+### Installation
 
-# Make migrations
-`python manage.py makemigrations`
+1. Clone the repository and navigate to the backend directory:
 
-`python manage.py migrate`
+    ```bash
+    git clone <repo-url>
+    cd Backend
+    ```
 
-# Run server
-`python manage.py runserver`
+2. (Optional) Create a virtual environment and activate it:
 
-# Endpoints to test
+    ```bash
+    python -m venv venv
+    source venv/bin/activate
+    ```
 
-Register:
-`http://127.0.0.1:8000/account/register`
+    For Windows:
 
-Login:
-`http://127.0.0.1:8000/api/token/`
+    ```bash
+    venv\Scripts\activate
+    ```
+
+3. Install the required libraries:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4. Run migrations:
+
+    ```bash
+    python manage.py makemigrations
+    python manage.py migrate
+    ```
+
+5. Start the server:
+
+    ```bash
+    python manage.py runserver
+    ```
+
+## API Endpoints
+
+For a detailed list of all API endpoints, please refer to the [API Documentation](API.md).
+
+## Testing
+
+To run the tests:
+
+```bash
+python manage.py test
+```
