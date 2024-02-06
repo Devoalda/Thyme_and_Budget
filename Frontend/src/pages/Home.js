@@ -47,16 +47,16 @@ export default function Home() {
                 {recipes.map((recipe, index) => (
                     <Col key={index} span={8}>
                         <Card
-                            title={recipe.title}
-                            cover={<img alt={recipe.title} src={recipe.image}/>}
+                            title={recipes.title}
+                            cover={<img alt={recipe.title} src={recipes.image}/>}
                         >
                             <Space direction="vertical" size="small">
                                 <Text strong>Author: {recipe.author}</Text>
-                                <Text strong>Instructions: {recipe.instructions}</Text>
-                                <Text strong>Cooking Time: {recipe.cooking_time} minutes</Text>
-                                <Text strong>Budget: ${recipe.budget}</Text>
-                                <Text>Created At: {new Date(recipe.created_at).toLocaleString()}</Text>
-                                <Text>Updated At: {new Date(recipe.updated_at).toLocaleString()}</Text>
+                                <Text strong>Instructions: {recipes.instructions}</Text>
+                                <Text strong>Cooking Time: {recipes.cooking_time} minutes</Text>
+                                <Text strong>Budget: ${recipes.budget}</Text>
+                                <Text>Created At: {new Date(recipes.created_at).toLocaleString()}</Text>
+                                <Text>Updated At: {new Date(recipes.updated_at).toLocaleString()}</Text>
                             </Space>
                         </Card>
                     </Col>
