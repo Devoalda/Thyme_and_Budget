@@ -24,10 +24,10 @@ root.render(<Router>
         <Route path="/" element={<Registration/>}/>
         <Route path="/login" element={<Login/>}/>
         <Route path="/logout" element={<Logout/>}/>
-        <Route path="/home" element={<Layout>
-            <Home/>
-        </Layout>}
-        />
+        <Layout>
+            <Route path="/home" element={<Home/>}/>
+            //add routes below if want same layout
+        </Layout>
         <Route path="*" element={<Error/>}/>
     </Routes>
 </Router>);
