@@ -1,8 +1,10 @@
-import React, {useState, useEffect} from 'react';
-import {Card, Row, Col, Typography, Space, message} from 'antd';
+import React, {useEffect, useState} from 'react';
+import {Col, message, Row, Typography} from 'antd';
 import axios from "axios";
+import RecipeCard from "../components/RecipeCard";
 
-const {Title, Text} = Typography;
+const {Title} = Typography;
+
 
 export default function Home() {
     const [recipes, setRecipes] = useState([]);
@@ -19,7 +21,7 @@ export default function Home() {
         const fetchData = async () => {
             try {
                 // Make a GET request to the specified endpoint
-                const response = await axios.get('http://127.0.0.1:8000/recipe/', {
+                const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/recipe/`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -40,28 +42,12 @@ export default function Home() {
     }, []);
 
 
-    return (
-        <div>
-            <Title level={2} style={{textAlign:'center'}}>My Dashboard</Title>
-            <Row gutter={16}>
-                {recipes.map((recipe, index) => (
-                    <Col key={index} span={8}>
-                        <Card
-                            title={recipes.title}
-                            cover={<img alt={recipe.title} src={recipes.image}/>}
-                        >
-                            <Space direction="vertical" size="small">
-                                <Text strong>Author: {recipe.author}</Text>
-                                <Text strong>Instructions: {recipes.instructions}</Text>
-                                <Text strong>Cooking Time: {recipes.cooking_time} minutes</Text>
-                                <Text strong>Budget: ${recipes.budget}</Text>
-                                <Text>Created At: {new Date(recipes.created_at).toLocaleString()}</Text>
-                                <Text>Updated At: {new Date(recipes.updated_at).toLocaleString()}</Text>
-                            </Space>
-                        </Card>
-                    </Col>
-                ))}
-            </Row>
-        </div>
-    );
+    return (<div>
+        <Title level={2} style={{textAlign: 'center'}}>My Dashboard</Title>
+        <Row gutter={16}>
+            {recipes.map((recipe, index) => (<Col key={index} span={8}>
+                <RecipeCard recipe={recipe}/>
+            </Col>))}
+        </Row>
+    </div>);
 }

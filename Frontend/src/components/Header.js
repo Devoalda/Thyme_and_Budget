@@ -1,25 +1,31 @@
 import React from 'react';
-import { Menu } from 'antd';
-import { Link } from 'react-router-dom';
+import {Menu} from 'antd';
+import {Link, useLocation} from 'react-router-dom';
 
-const { Item } = Menu;
+const {Item} = Menu;
 
 export default function Header() {
+    const location = useLocation();
+    const currentPath = location.pathname;
+
     return (
-        <Menu mode="horizontal">
-            <Item key="home">
-                <Link to="/">Home</Link>
+        <Menu mode="horizontal" selectedKeys={[currentPath]}>
+            <Item key="/home">
+                <Link to="/home">Home</Link>
             </Item>
-            <Item key="recipes">
+            <Item key="/recipes">
                 <Link to="/recipes">Recipes</Link>
             </Item>
-            <Item key="nutrition">
+            <Item key="/nutrition">
                 <Link to="/nutrition">Nutrition Values</Link>
             </Item>
-            <Item key="mealplan">
+            <Item key="/mealplan">
                 <Link to="/mealplan">Get Meal Plan</Link>
             </Item>
-            <Item key="logout">
+            <Item key="/myrecipes">
+                <Link to="/myrecipes">My Recipes</Link>
+            </Item>
+            <Item key="/logout">
                 <Link to="/logout">Logout</Link>
             </Item>
         </Menu>
