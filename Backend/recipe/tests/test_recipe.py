@@ -33,7 +33,7 @@ class RecipeViewSetTestCase(TestCase):
     def tearDown(self):
         recipe = Recipe.objects.first()
         if recipe and recipe.image:
-            print(f"Deleting image at {os.path.join(settings.MEDIA_ROOT, recipe.image.path)}")
+            # print(f"Deleting image at {os.path.join(settings.MEDIA_ROOT, recipe.image.path)}")
             os.remove(os.path.join(settings.MEDIA_ROOT, recipe.image.path))
 
     def test_create_recipe(self):

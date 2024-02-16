@@ -15,7 +15,7 @@ class User(AbstractUser):
     username = models.CharField(max_length=100, unique=True)
     name = models.CharField(max_length=100)
     email = models.EmailField(max_length=100)
-    Phone_number = models.CharField(max_length=100)
+    phone_number = models.CharField(max_length=100)
     role = models.CharField(max_length=10, choices=[(role.value, role.name) for role in Role])
 
     objects = UserManager()

@@ -21,23 +21,24 @@ from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import (TokenObtainPairView, TokenRefreshView, )
 
-urlpatterns = [
-path('admin/', admin.site.urls),
+urlpatterns = [path('admin/', admin.site.urls),
 
-# Documentation
-path('api/schema/', SpectacularAPIView.as_view(), name='schema'),  # Optional UI:
-path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+               # Documentation
+               path('api/schema/', SpectacularAPIView.as_view(), name='schema'),  # Optional UI:
+               path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+               path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
-# Recipe
-path('recipe/', include('recipe.urls')),
+               # Recipe
+               # path('recipe/', include('recipe.urls')),
 
-# nutrition value
-path('nutritionValue/', include('nutritionValue.urls')),
+               # nutrition value
+               # path('nutritionValue/', include('nutritionValue.urls')),
 
-# jwt
-path('account/', include('account.urls')),
-path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), ] + static(
-    settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+               # thyme_and_budget_app
+               path('', include('thyme_and_budget_app.urls')),
 
+               # jwt
+               path('account/', include('account.urls')),
+               path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+               path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), ] + static(
+        settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
