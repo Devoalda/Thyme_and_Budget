@@ -19,6 +19,7 @@ env = environ.Env(
     DEBUG=(bool, False)
 )
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -41,6 +42,7 @@ DEBUG = env('DEBUG', default=False)
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
 
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -58,7 +60,10 @@ INSTALLED_APPS = [
     'drf_spectacular_sidecar',
     'nutritionValue',
     'corsheaders',
+    'thyme_and_budget_app',
 ]
+
+AUTH_USER_MODEL = 'account.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
