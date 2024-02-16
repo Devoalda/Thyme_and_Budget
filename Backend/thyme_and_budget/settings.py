@@ -54,7 +54,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework', # added for REST API
     'rest_framework_simplejwt',
-    'recipe',
     'account',
     'drf_spectacular',
     'drf_spectacular_sidecar',

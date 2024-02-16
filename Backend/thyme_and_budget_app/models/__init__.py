@@ -1,4 +1,3 @@
-from django.db import models
-from . import *
-
-# Create your models here.
+from .foodModel import FoodItem
+from .locationModel import Location
+from .collectionModel import Collection
