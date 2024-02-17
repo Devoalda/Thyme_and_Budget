@@ -3,6 +3,7 @@ from django.core.files.base import ContentFile
 from django.core.validators import validate_image_file_extension
 from django.http import QueryDict
 from drf_extra_fields.fields import Base64ImageField
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .locationSerializer import LocationSerializer
@@ -38,6 +39,7 @@ class FoodItemSerializer(serializers.ModelSerializer):
             representation['image'] = str(instance.image)
         return representation
 
+    @extend_schema_field(Base64ImageField)
     def get_location(self, obj):
         if obj.location:
             location_data = LocationSerializer(obj.location).data

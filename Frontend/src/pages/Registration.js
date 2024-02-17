@@ -35,26 +35,22 @@ const getValidationRules = (field) => {
 
 // Function to handle form fields
 const getFormField = (name, label, children) => {
-    return (
-        <Form.Item
+    return (<Form.Item
             name={name}
             label={label}
             rules={getValidationRules(name)}
         >
             {children}
-        </Form.Item>
-    );
+        </Form.Item>);
 };
 
 // Function to handle form buttons
 const getFormButton = (type, htmlType, text, style = {width: '100%'}) => {
-    return (
-        <Form.Item>
+    return (<Form.Item>
             <Button type={type} htmlType={htmlType} style={style}>
                 {text}
             </Button>
-        </Form.Item>
-    );
+        </Form.Item>);
 };
 
 // Main function
@@ -77,7 +73,7 @@ const RegistrationForm = () => {
 
         try {
             // Send post request to backend
-            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL || 'http://127.0.0.1:8000'}/account/register`, {
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL || 'http://127.0.0.1:8000'}/register/`, {
                 username: values.username,
                 password: values.password,
                 first_name: values.first_name,
@@ -105,7 +101,7 @@ const RegistrationForm = () => {
 
         } catch (error) {
             if (error.response) {
-                for (const [key, value] of Object.entries(error.response.data.errors)) {
+                for (const [key, value] of Object.entries(error.response.data)) {
                     message.error(`${key}: ${value}`);
                 }
             } else if (error.request) {
@@ -125,8 +121,7 @@ const RegistrationForm = () => {
         }
     };
 
-    return (
-        <div style={{
+    return (<div style={{
             width: '300px',
             margin: 'auto',
             padding: '20px',
@@ -151,21 +146,22 @@ const RegistrationForm = () => {
                     {getFormField("first_name", "First Name", <Input/>)}
                     {getFormField("last_name", "Last Name", <Input/>)}
                     {getFormField("email", "Email", <Input/>)}
-                    {getFormField("role", "Role",
-                        <Select placeholder="Select a role" onChange={(value) => setRole(value)}>
-                            <Option value="donor">Donor</Option>
-                            <Option value="receiver">Receiver</Option>
-                        </Select>
-                    )}
+                    {getFormField("role", "Role", <Select placeholder="Select a role"
+                                                          onChange={(value) => setRole(value)}>
+                        <Option value="donor">Donor</Option>
+                        <Option value="receiver">Receiver</Option>
+                    </Select>)}
                     {getFormField("phone_number", "Phone Number", <Input/>)}
                     {role === 'donor' && getFormField("postal_code", "Postal Code", <Input/>)}
 
                     {getFormButton("primary", "submit", "Register")}
-                    {getFormButton("default", "button", "Login", {width: '100%', href: '/login'})}
                 </Form>
+                <Button type="primary" htmlType="button" style={{width: '100%'}}
+                        onClick={() => navigate('/login')}>
+                    Login
+                </Button>
             </Space>
-        </div>
-    );
+        </div>);
 };
 
 export default RegistrationForm;

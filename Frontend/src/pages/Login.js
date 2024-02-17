@@ -1,9 +1,9 @@
 import React from 'react';
 import {useNavigate} from 'react-router-dom';
-import {Button, Form, Input, message, Typography, Space} from 'antd';
+import {Button, Form, Input, message, Space, Typography} from 'antd';
 import axios from "axios";
 
-const { Title, Text } = Typography;
+const {Title, Text} = Typography;
 
 const Login = () => {
     const navigate = useNavigate();
@@ -16,13 +16,16 @@ const Login = () => {
 
     const onFinish = (values) => {
         // Send post request to backend
-        axios.post(`${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000'}/api/token/`, {
+        axios.post(`${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000'}/login/`, {
             username: values.username, password: values.password,
         })
             .then(response => {
                 // Set the token
                 localStorage.setItem('token', response.data.access);
                 localStorage.setItem('refresh', response.data.refresh);
+                if (process.env.NODE_ENV === 'development') {
+                    localStorage.setItem('role', response.data.authenticatedUser.role);
+                }
                 // Redirect to home page
                 navigate('/home');
             })
@@ -32,8 +35,14 @@ const Login = () => {
             });
     };
 
-    return (
-        <div style={{width: '300px', margin: 'auto', padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '10px', boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)'}}>
+    return (<div style={{
+            width: '300px',
+            margin: 'auto',
+            padding: '20px',
+            backgroundColor: '#f8f9fa',
+            borderRadius: '10px',
+            boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)'
+        }}>
             <Space direction="vertical" size="large" style={{width: '100%'}}>
                 <Title level={2} style={{textAlign: 'center', color: '#343a40'}}>Thyme and Budget</Title>
                 <Text style={{textAlign: 'center', color: '#6c757d'}}>Share food, save the planet</Text>
@@ -74,8 +83,7 @@ const Login = () => {
                     </Form.Item>
                 </Form>
             </Space>
-        </div>
-    );
+        </div>);
 };
 
 export default Login;

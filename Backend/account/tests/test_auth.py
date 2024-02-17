@@ -46,7 +46,7 @@ class UserRegistrationTest(BaseViewTest):
             "role": "donor",
         }
         self.response = self.client.post(reverse("register"), data, format="json")
-        self.assertEqual(self.response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(self.response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class UserAuthenticationTest(BaseViewTest):
@@ -98,7 +98,6 @@ class UserLogoutTest(BaseViewTest):
         token = self.response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token)
         self.response = self.client.post(reverse("logout"), format="json")
-        print(f"Response: {self.response}")
         self.assertEqual(self.response.status_code, status.HTTP_200_OK)
 
     def test_logout_user_without_token(self):
