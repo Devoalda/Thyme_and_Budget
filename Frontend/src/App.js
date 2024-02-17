@@ -6,13 +6,13 @@ import Login from './pages/Login';
 import Home from './pages/Home';
 import Error from './pages/Error';
 import Logout from './pages/Logout';
-import MyRecipes from "./pages/MyRecipe";
+import MyFoodItems from './pages/MyFoodItems';
 
 function App() {
     return (<Router>
             <Routes>
                 <Route path="/" element={<Registration/>}/>
-                <Route path="/myrecipes" element={<MyRecipes/>}/>
+                <Route path="/myfooditems" element={<MyFoodItems/>}/>
                 <Route path="/login" element={<Login/>}/>
                 <Route path="/logout" element={<Logout/>}/>
                 <Route

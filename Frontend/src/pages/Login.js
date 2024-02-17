@@ -1,7 +1,9 @@
 import React from 'react';
 import {useNavigate} from 'react-router-dom';
-import {Button, Form, Input, message} from 'antd';
+import {Button, Form, Input, message, Typography, Space} from 'antd';
 import axios from "axios";
+
+const { Title, Text } = Typography;
 
 const Login = () => {
     const navigate = useNavigate();
@@ -17,62 +19,63 @@ const Login = () => {
         axios.post(`${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000'}/api/token/`, {
             username: values.username, password: values.password,
         })
-            .then((response) => {
-                setTimeout(() => {
-                    // Save tokens to local storage
-                    localStorage.setItem('token', response.data.access);
-                    localStorage.setItem('refresh', response.data.refresh);
-                }, 1000);
+            .then(response => {
+                // Set the token
+                localStorage.setItem('token', response.data.access);
+                localStorage.setItem('refresh', response.data.refresh);
                 // Redirect to home page
                 navigate('/home');
-            }, (error) => {
-                console.log(error);
-                message.error('Failed to login. Please try again.');
+            })
+            .catch(error => {
+                // Handle error
+                message.error('Invalid username or password');
             });
     };
 
-    return (<div style={{width: '300px', margin: 'auto'}}>
-        <Form
-            name="login"
-            onFinish={onFinish}
-            initialValues={{remember: true}}
-            scrollToFirstError
-        >
-            <h1 style={{textAlign: 'center'}}>Login</h1>
+    return (
+        <div style={{width: '300px', margin: 'auto', padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '10px', boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)'}}>
+            <Space direction="vertical" size="large" style={{width: '100%'}}>
+                <Title level={2} style={{textAlign: 'center', color: '#343a40'}}>Thyme and Budget</Title>
+                <Text style={{textAlign: 'center', color: '#6c757d'}}>Share food, save the planet</Text>
+                <Form
+                    name="login"
+                    onFinish={onFinish}
+                    initialValues={{remember: true}}
+                    scrollToFirstError
+                >
+                    <Form.Item
+                        name="username"
+                        rules={[{
+                            required: true, message: 'Please input your username!',
+                        },]}
+                    >
+                        <Input size="large" placeholder="Username"/>
+                    </Form.Item>
 
-            <Form.Item
-                name="username"
-                label="Username"
-                rules={[{
-                    required: true, message: 'Please input your username!',
-                },]}
-            >
-                <Input/>
-            </Form.Item>
+                    <Form.Item
+                        name="password"
+                        rules={[{
+                            required: true, message: 'Please input your password!',
+                        },]}
+                    >
+                        <Input.Password size="large" placeholder="Password"/>
+                    </Form.Item>
 
-            <Form.Item
-                name="password"
-                label="Password"
-                rules={[{
-                    required: true, message: 'Please input your password!',
-                },]}
-            >
-                <Input.Password/>
-            </Form.Item>
-
-            <Form.Item>
-                <Button type="primary" htmlType="submit" style={{width: '100%'}}>
-                    Login
-                </Button>
-            </Form.Item>
-            <Form.Item>
-                <Button type="primary" htmlType="button" style={{width: '100%'}}
-                        onClick={() => navigate('/')}>
-                    Register
-                </Button>
-            </Form.Item>
-        </Form>
-    </div>);
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit" size="large" style={{width: '100%'}}>
+                            Login
+                        </Button>
+                    </Form.Item>
+                    <Form.Item>
+                        <Button type="primary" htmlType="button" size="large" style={{width: '100%'}}
+                                onClick={() => navigate('/')}>
+                            Register
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Space>
+        </div>
+    );
 };
 
 export default Login;

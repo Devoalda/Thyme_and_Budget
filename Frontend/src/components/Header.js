@@ -13,17 +13,17 @@ export default function Header() {
             <Item key="/home">
                 <Link to="/home">Home</Link>
             </Item>
-            <Item key="/recipes">
-                <Link to="/recipes">Recipes</Link>
-            </Item>
-            <Item key="/nutrition">
-                <Link to="/nutrition">Nutrition Values</Link>
-            </Item>
-            <Item key="/mealplan">
-                <Link to="/mealplan">Get Meal Plan</Link>
-            </Item>
-            <Item key="/myrecipes">
-                <Link to="/myrecipes">My Recipes</Link>
+            {/*<Item key="/recipes">*/}
+            {/*    <Link to="/recipes">Recipes</Link>*/}
+            {/*</Item>*/}
+            {/*<Item key="/nutrition">*/}
+            {/*    <Link to="/nutrition">Nutrition Values</Link>*/}
+            {/*</Item>*/}
+            {/*<Item key="/mealplan">*/}
+            {/*    <Link to="/mealplan">Get Meal Plan</Link>*/}
+            {/*</Item>*/}
+            <Item key="/myfooditems">
+                <Link to="/myfooditems">My Food Items</Link>
             </Item>
             <Item key="/logout">
                 <Link to="/logout">Logout</Link>

@@ -1,9 +1,10 @@
 import React, {useState} from 'react';
-import {Button, Form, Input, Select} from 'antd';
+import {Button, Form, Input, Select, Space, Typography} from 'antd';
 import axios from "axios";
 import {useNavigate} from 'react-router-dom';
 
 const {Option} = Select;
+const { Title, Text } = Typography;
 
 const RegistrationForm = () => {
     const navigate = useNavigate();
@@ -53,133 +54,144 @@ const RegistrationForm = () => {
         }
     };
 
-    return (<div style={{width: '300px', margin: 'auto'}}>
-        <Form
-            name="register"
-            onFinish={onFinish}
-            initialValues={{remember: true, role: 'receiver'}}
-            scrollToFirstError
-            style={{backgroundColor: '#f0f0f0', padding: '20px', borderRadius: '5px'}}
-        >
-            <h1 style={{textAlign: 'center', color: '#333'}}>Registration</h1>
-
-            <Form.Item
-                name="username"
-                label="Username"
-                rules={[{
-                    required: true, message: 'Please input your username!',
-                },]}
+    return (<div style={{
+        width: '300px',
+        margin: 'auto',
+        padding: '20px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '10px',
+        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)'
+    }}>
+        <Space direction="vertical" size="large" style={{width: '100%'}}>
+            <Title level={2} style={{textAlign: 'center', color: '#343a40'}}>Thyme and Budget</Title>
+            <Text style={{textAlign: 'center', color: '#6c757d'}}>Share food, save the planet</Text>
+            <Form
+                name="register"
+                onFinish={onFinish}
+                initialValues={{remember: true, role: 'receiver'}}
+                scrollToFirstError
             >
-                <Input/>
-            </Form.Item>
 
-            <Form.Item
-                name="password"
-                label="Password"
-                rules={[{
-                    required: true, message: 'Please input your password!',
-                },]}
-                hasFeedback
-            >
-                <Input.Password/>
-            </Form.Item>
+                <h1 style={{textAlign: 'center', color: '#333'}}>Registration</h1>
 
-            <Form.Item
-                name="confirm"
-                label="Confirm Password"
-                dependencies={['password']}
-                hasFeedback
-                rules={[{
-                    required: true, message: 'Please confirm your password!',
-                }, ({getFieldValue}) => ({
-                    validator(_, value) {
-                        if (!value || getFieldValue('password') === value) {
-                            return Promise.resolve();
-                        }
-                        return Promise.reject('The two passwords do not match!');
-                    },
-                }),]}
-            >
-                <Input.Password/>
-            </Form.Item>
+                <Form.Item
+                    name="username"
+                    label="Username"
+                    rules={[{
+                        required: true, message: 'Please input your username!',
+                    },]}
+                >
+                    <Input/>
+                </Form.Item>
 
-            <Form.Item
-                name="first_name"
-                label="First Name"
-                rules={[{
-                    required: true, message: 'Please input your first name!',
-                },]}
-            >
-                <Input/>
-            </Form.Item>
+                <Form.Item
+                    name="password"
+                    label="Password"
+                    rules={[{
+                        required: true, message: 'Please input your password!',
+                    },]}
+                    hasFeedback
+                >
+                    <Input.Password/>
+                </Form.Item>
 
-            <Form.Item
-                name="last_name"
-                label="Last Name"
-                rules={[{
-                    required: true, message: 'Please input your last name!',
-                },]}
-            >
-                <Input/>
-            </Form.Item>
+                <Form.Item
+                    name="confirm"
+                    label="Confirm Password"
+                    dependencies={['password']}
+                    hasFeedback
+                    rules={[{
+                        required: true, message: 'Please confirm your password!',
+                    }, ({getFieldValue}) => ({
+                        validator(_, value) {
+                            if (!value || getFieldValue('password') === value) {
+                                return Promise.resolve();
+                            }
+                            return Promise.reject('The two passwords do not match!');
+                        },
+                    }),]}
+                >
+                    <Input.Password/>
+                </Form.Item>
 
-            <Form.Item
-                name="email"
-                label="Email"
-                rules={[{
-                    required: true, message: 'Please input your email!',
-                },]}
-            >
-                <Input/>
-            </Form.Item>
+                <Form.Item
+                    name="first_name"
+                    label="First Name"
+                    rules={[{
+                        required: true, message: 'Please input your first name!',
+                    },]}
+                >
+                    <Input/>
+                </Form.Item>
 
-            <Form.Item
-                name="role"
-                label="Role"
-                rules={[{
-                    required: true, message: 'Please select your role!',
-                },]}
-            >
-                <Select placeholder="Select a role" onChange={(value) => setRole(value)}>
-                    <Option value="donor">Donor</Option>
-                    <Option value="receiver">Receiver</Option>
-                </Select>
-            </Form.Item>
+                <Form.Item
+                    name="last_name"
+                    label="Last Name"
+                    rules={[{
+                        required: true, message: 'Please input your last name!',
+                    },]}
+                >
+                    <Input/>
+                </Form.Item>
 
-            <Form.Item
-                name="phone_number"
-                label="Phone Number"
-                rules={[{
-                    required: true, message: 'Please input your phone number!',
-                }, ...(process.env.NODE_ENV !== 'development' ? [{
-                    pattern: /^(\+65)?[689]\d{7}$/, message: 'Please enter a valid Singapore phone number!',
-                }] : []),]}
-            >
-                <Input/>
-            </Form.Item>
+                <Form.Item
+                    name="email"
+                    label="Email"
+                    rules={[{
+                        required: true, message: 'Please input your email!',
+                    },]}
+                >
+                    <Input/>
+                </Form.Item>
 
-            {role === 'donor' && (<Form.Item
-                name="postal_code"
-                label="Postal Code"
-                rules={[{
-                    required: true, message: 'Please input your postal code!',
-                },]}
-            >
-                <Input/>
-            </Form.Item>)}
+                <Form.Item
+                    name="role"
+                    label="Role"
+                    rules={[{
+                        required: true, message: 'Please select your role!',
+                    },]}
+                >
+                    <Select placeholder="Select a role" onChange={(value) => setRole(value)}>
+                        <Option value="donor">Donor</Option>
+                        <Option value="receiver">Receiver</Option>
+                    </Select>
+                </Form.Item>
 
-            <Form.Item>
-                <Button type="primary" htmlType="submit" style={{width: '100%'}}>
-                    Register
-                </Button>
-            </Form.Item>
+                <Form.Item
+                    name="phone_number"
+                    label="Phone Number"
+                    rules={[{
+                        required: true, message: 'Please input your phone number!',
+                    }, ...(process.env.NODE_ENV !== 'development' ? [{
+                        pattern: /^(\+65)?[689]\d{7}$/, message: 'Please enter a valid Singapore phone number!',
+                    }] : []),]}
+                >
+                    <Input/>
+                </Form.Item>
 
-            <Form.Item>
-                <Button type="default" href={'/login'} htmlType="button" style={{width: '100%'}}>
-                    Login
-                </Button>
-            </Form.Item>
-        </Form>
+                {role === 'donor' && (<Form.Item
+                    name="postal_code"
+                    label="Postal Code"
+                    rules={[{
+                        required: true, message: 'Please input your postal code!',
+                    },]}
+                >
+                    <Input/>
+                </Form.Item>)}
+
+                <Form.Item>
+                    <Button type="primary" htmlType="submit" style={{width: '100%'}}>
+                        Register
+                    </Button>
+                </Form.Item>
+
+                <Form.Item>
+                    <Button type="default" href={'/login'} htmlType="button" style={{width: '100%'}}>
+                        Login
+                    </Button>
+                </Form.Item>
+            </Form>
+        </Space>
     </div>);
 };
 

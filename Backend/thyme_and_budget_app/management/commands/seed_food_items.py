@@ -15,6 +15,8 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         fake = Faker()
         total = kwargs['total']
+        non_perishable_foods = ['canned food', 'biscuits', 'drink powders']  # Add more items as needed
+
         for _ in range(total):
             # Get a random location or create a new one if none exist
             location = Location.objects.order_by('?').first()
@@ -24,13 +26,13 @@ class Command(BaseCommand):
                                                    # generates a random 5-digit number
                                                    )
             # Generate a random image
-            image_url = f"https://source.unsplash.com/random?food,{fake.word(ext_word_list=['pizza', 'burger', 'salad', 'sushi', 'steak'])}"
+            food_item_name = fake.word(ext_word_list=non_perishable_foods)
+            image_url = f"https://source.unsplash.com/random?food,{food_item_name}"
             response = requests.get(image_url)
             image_name = image_url.split("/")[-1]  # Use the last part of the URL as the image name
 
-            food_item = FoodItem(name=fake.catch_phrase(),
-                                 expiry_date=fake.date_between(start_date='+1d', end_date='+1y'),
-                                 # generates a random date between tomorrow and one year from now
+            food_item = FoodItem(name=food_item_name, expiry_date=fake.date_between(start_date='+1d', end_date='+10y'),
+                                 # generates a random date between tomorrow and ten years from now
                                  quantity=fake.random_int(min=1, max=100),
                                  # generates a random integer between 1 and 100
                                  location=location)
