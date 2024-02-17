@@ -46,7 +46,13 @@ These instructions will get you a copy of the project up and running on your loc
     python manage.py migrate
     ```
 
-5. Start the server:
+5. Run the seed script to populate the database with some initial data:
+
+    ```bash
+    python manage.py seed_food_items
+    ```
+
+6. Start the server:
 
     ```bash
     python manage.py runserver

@@ -11,7 +11,7 @@
 
 1. Navigate to the project directory
     ```bash
-    cd Frontend/thyme_and_budget_frontend
+    cd Frontend
     ```
 2. Install dependencies
     ```bash
