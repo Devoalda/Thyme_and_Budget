@@ -54,7 +54,8 @@ const RegistrationForm = () => {
         }
     };
 
-    return (<div style={{
+    return (
+        <div style={{
         width: '300px',
         margin: 'auto',
         padding: '20px',

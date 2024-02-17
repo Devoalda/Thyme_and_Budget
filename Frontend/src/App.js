@@ -7,12 +7,14 @@ import Home from './pages/Home';
 import Error from './pages/Error';
 import Logout from './pages/Logout';
 import MyFoodItems from './pages/MyFoodItems';
+import NewFoodItem from './pages/NewFoodItem';
 
 function App() {
     return (<Router>
             <Routes>
                 <Route path="/" element={<Registration/>}/>
                 <Route path="/myfooditems" element={<MyFoodItems/>}/>
+                <Route path="/newfooditem" element={<NewFoodItem/>}/>
                 <Route path="/login" element={<Login/>}/>
                 <Route path="/logout" element={<Logout/>}/>
                 <Route
