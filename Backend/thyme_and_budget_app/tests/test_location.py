@@ -14,7 +14,7 @@ class LocationTests(APITestCase):
         self.user = User.objects.create_user(username='testuser', password='testpassword')
         self.client.force_authenticate(user=self.user)
 
-        self.location_data = {'postal_code': '12345'}
+        self.location_data = {'postal_code': '12345', 'username': 'testuser'}
 
         # Create a location
         self.location = Location.objects.create(postal_code='12345', donor=self.user)

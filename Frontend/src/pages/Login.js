@@ -66,7 +66,8 @@ const Login = () => {
                 </Button>
             </Form.Item>
             <Form.Item>
-                <Button type="link" htmlType="button" style={{width: '100%'}} href="/">
+                <Button type="primary" htmlType="button" style={{width: '100%'}}
+                        onClick={() => navigate('/')}>
                     Register
                 </Button>
             </Form.Item>
