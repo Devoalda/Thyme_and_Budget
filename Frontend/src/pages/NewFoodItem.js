@@ -36,7 +36,9 @@ const NewFoodItem = () => {
                 navigate('/home');
             };
         } catch (error) {
-            console.log(error);
+            if (process.env.NODE_ENV === 'development') {
+                console.log(error);
+            }
             message.error('Failed to create food item');
         }
     };

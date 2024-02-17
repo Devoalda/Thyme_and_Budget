@@ -1,10 +1,10 @@
 import React, {useState} from 'react';
-import {Button, Form, Input, Select, Space, Typography} from 'antd';
+import {Button, Form, Input, message, Select, Space, Typography} from 'antd';
 import axios from "axios";
 import {useNavigate} from 'react-router-dom';
 
 const {Option} = Select;
-const { Title, Text } = Typography;
+const {Title, Text} = Typography;
 
 const RegistrationForm = () => {
     const navigate = useNavigate();
@@ -17,11 +17,9 @@ const RegistrationForm = () => {
     }
 
     const onFinish = async (values) => {
-        console.log('Received values:', values);
-
         // Validate data before sending
         if (!values.username || !values.password || !values.first_name || !values.last_name || !values.email || !values.role || !values.phone_number) {
-            console.log('Missing required fields');
+            message.error('Missing required fields');
             return;
         }
 
@@ -37,8 +35,19 @@ const RegistrationForm = () => {
                 phone_number: values.phone_number,
             });
 
-            console.log(response);
-            // message.success('Registration successful!');
+            if (process.env.NODE_ENV === 'development') {
+                console.log(response);
+            }
+
+            // Check the response status code
+            if (response.status === 201) {
+                message.success('Registration successful!');
+            } else if (response.status === 400) {
+                // Print out errors from error object in response
+                for (const [key, value] of Object.entries(response.data)) {
+                    message.error(`${key}: ${value}`);
+                }
+            }
 
             // If role is 'donor', send postal_code to /location endpoint
             if (values.role === 'donor' && values.postal_code) {
@@ -46,16 +55,34 @@ const RegistrationForm = () => {
                     username: values.username, postal_code: values.postal_code,
                 });
 
-                console.log(locationResponse);
-                // message.success('Postal code sent successfully!');
+                if (process.env.NODE_ENV === 'development') {
+                    console.log(locationResponse);
+                }
             }
+
         } catch (error) {
-            console.log(error);
+            if (error.response) {
+                for (const [key, value] of Object.entries(error.response.data.errors)) {
+                    message.error(`${key}: ${value}`);
+                }
+            } else if (error.request) {
+                message.error('Network error');
+                if (process.env.NODE_ENV === 'development') {
+                    console.log(error.request);
+                }
+            } else {
+                message.error('Unknown error');
+                if (process.env.NODE_ENV === 'development') {
+                    console.log(error.config);
+                }
+            }
+            if (process.env.NODE_ENV === 'development') {
+                console.log(error.config);
+            }
         }
     };
 
-    return (
-        <div style={{
+    return (<div style={{
         width: '300px',
         margin: 'auto',
         padding: '20px',
