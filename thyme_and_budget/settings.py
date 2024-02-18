@@ -55,7 +55,6 @@ INSTALLED_APPS = [
     'account',
     'drf_spectacular',
     'drf_spectacular_sidecar',
-    'nutritionValue',
     'corsheaders',
     'thyme_and_budget_app',
 ]

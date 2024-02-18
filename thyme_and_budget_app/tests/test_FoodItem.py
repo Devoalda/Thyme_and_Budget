@@ -1,6 +1,7 @@
 import base64
 
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.views import status
@@ -13,12 +14,14 @@ User = get_user_model()
 class FoodTests(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.location = Location.objects.create(postal_code='12345', donor_id=1)
-        cls.user = User.objects.create_user(username='testuser', password='testpassword', location=cls.location)
+        cls.user = User.objects.create_user(username='testuser', password='testpassword')
+        cls.location = Location.objects.create(postal_code='12345', donor_id=cls.user.id)
         with open('thyme_and_budget_app/tests/test_image.jpg', 'rb') as image_file:
-            cls.image = base64.b64encode(image_file.read()).decode('utf-8')
-        cls.food_data = {'name': '1234', 'expiry_date': '2024-02-16', 'quantity': 100000, 'image': cls.image, }
-        cls.food_item = FoodItem.objects.create(name='1234', expiry_date='2024-02-16', quantity=100000, image=cls.image,
+            cls.image = base64.b64encode(image_file.read())  # remove the decode('utf-8') call here
+            data = ContentFile(cls.image, name='temp.jpg')  # create a Django ContentFile
+        cls.food_data = {'name': '1234', 'expiry_date': '2024-02-16', 'quantity': 100000, 'image': data, }
+
+        cls.food_item = FoodItem.objects.create(name='1234', expiry_date='2024-02-16', quantity=100000, image=data,
                                                 location=cls.location)
 
     def setUp(self):
@@ -30,6 +33,10 @@ class FoodTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_authenticated_user_can_update_food(self):
+        # Convert the ContentFile object back to a base64 string
+        image_data = base64.b64encode(self.food_data['image'].read()).decode('utf-8')
+        # Update the 'image' field in the food_data dictionary
+        self.food_data['image'] = image_data
         response = self.client.put(reverse('food-detail', kwargs={'pk': self.food_item.pk}), self.food_data,
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
