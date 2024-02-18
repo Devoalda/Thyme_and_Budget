@@ -106,6 +106,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
 ]
+USE_X_FORWARDED_HOST = env.bool('USE_X_FORWARDED_HOST', default=False)
 
 SPECTACULAR_SETTINGS = {
     'TITLE'                  : 'Thyme and Budget',

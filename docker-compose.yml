@@ -9,9 +9,9 @@ services:
       - "9888:8000"
     environment:
       - DEBUG=True
-      - SECRET_KEY=A_RANDOM_SECRET_KEY
+      - SECRET_KEY=uqKK42OerZHUkcjBGs8yyntmAuQSA2u3zQ3R5t2zRU4bYXyw6x # Change this to a random string
       - ALLOWED_HOSTS=*
-      - CACHE=True
+      - USE_X_FORWARDED_HOST=True
       - DB_NAME=thyme_and_budget
       - DB_USER=thyme_and_budget
       - DB_PASSWORD=thyme_and_budget
