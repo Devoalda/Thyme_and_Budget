@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  thyme_and_budget:
+    build: .
+    restart:
+      always
+    ports:
+      - "8000:8000"  # Map container port 8000 to host port 8000
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=A_RANDOM_SECRET_KEY
+      - ALLOWED_HOSTS=*
+      - CACHE=True
+      - DB_NAME=thyme_and_budget
+      - DB_USER=thyme_and_budget
+      - DB_PASSWORD=thyme_and_budget
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    depends_on:
+      - postgres
+    networks:
+      - dbnet
+
+  postgres:
+    image: postgres:16
+    restart:
+      always
+    environment:
+      - POSTGRES_USER=thyme_and_budget
+      - POSTGRES_PASSWORD=thyme_and_budget
+      - POSTGRES_DB=thyme_and_budget
+    volumes:
+        - dbdata:/var/lib/postgresql/data
+    networks:
+      - dbnet
+
+volumes:
+    dbdata:
+networks:
+  dbnet:

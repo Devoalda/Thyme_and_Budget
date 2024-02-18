@@ -155,7 +155,7 @@ match DB_ENGINE:
     case 'postgresql' if not GITHUB_WORKFLOW:
         DATABASES = {
             'default': {
-                'ENGINE'  : 'django.db.backends.postgresql',
+                'ENGINE'  : 'django.db.backends.postgresql_psycopg2',
                 'NAME'    : env.str('DB_NAME', 'thyme_and_budget'),
                 'USER'    : env.str('DB_USER', 'mariadb'),
                 'PASSWORD': env.str('DB_PASSWORD', 'mariadb'),
