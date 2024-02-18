@@ -17,8 +17,8 @@ class CollectionViewSet(viewsets.ModelViewSet):
         if request.user.is_authenticated:
             try:
                 user = get_user_model().objects.get(id=request.user.id)
-                if user.Phone_number:
-                    serializer.save(phone_number=user.Phone_number, quantity=request.data['quantity'])
+                if user.phone_number:
+                    serializer.save(phone_number=user.phone_number, quantity=request.data['quantity'])
                 else:
                     raise AttributeError
             except AttributeError:
