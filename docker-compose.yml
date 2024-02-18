@@ -2,7 +2,7 @@ version: '3'
 
 services:
   thyme_and_budget:
-    image: amusement3004/thyme_and_budget:master
+    build: .
     restart:
       always
     ports:
