@@ -106,7 +106,9 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
 ]
+
 USE_X_FORWARDED_HOST = env.bool('USE_X_FORWARDED_HOST', default=False)
+SECURE_PROXY_SSL_HEADER = ('X-Forwarded-For', 'https')
 
 SPECTACULAR_SETTINGS = {
     'TITLE'                  : 'Thyme and Budget',

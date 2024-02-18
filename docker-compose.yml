@@ -8,7 +8,7 @@ services:
     ports:
       - "9888:8000"
     environment:
-      - DEBUG=True
+      - DEBUG=False
       - SECRET_KEY=uqKK42OerZHUkcjBGs8yyntmAuQSA2u3zQ3R5t2zRU4bYXyw6x # Change this to a random string
       - ALLOWED_HOSTS=*
       - USE_X_FORWARDED_HOST=True
