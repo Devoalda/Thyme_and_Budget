@@ -1,7 +1,6 @@
-from django.db import models
-
+from django.db import models, transaction
+from django.core.exceptions import ValidationError
 from .foodModel import FoodItem
-
 
 class Collection(models.Model):
     id = models.AutoField(primary_key=True)
@@ -13,3 +12,12 @@ class Collection(models.Model):
 
     def __str__(self):
         return self.phone_number
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            food_item = FoodItem.objects.select_for_update().get(pk=self.food_item_id)
+            if food_item.quantity < int(self.quantity):
+                raise ValidationError('Not enough quantity in FoodItem')
+            food_item.quantity -= self.quantity
+            food_item.save()
+            super().save(*args, **kwargs)

@@ -21,6 +21,7 @@ drf-spectacular-sidecar==2024.2.1
 drf-writable-nested==0.7.0
 Faker==22.7.0
 filetype==1.2.0
+Flask==3.0.2
 Flask-JWT-Extended==4.6.0
 grpcio==1.60.1
 grpcio-tools==1.60.1

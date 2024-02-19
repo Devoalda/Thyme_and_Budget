@@ -103,9 +103,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-]
+CORS_ALLOW_ALL_ORIGINS = True
 
 # USE_X_FORWARDED_HOST = env.bool('USE_X_FORWARDED_HOST', default=False)
 # SECURE_PROXY_SSL_HEADER = ('X-Forwarded-For', 'https')
@@ -146,50 +144,49 @@ WSGI_APPLICATION = 'thyme_and_budget.wsgi.application'
 DB_ENGINE = env.str('DB_ENGINE', 'sqlite')
 GITHUB_WORKFLOW = os.getenv('GITHUB_WORKFLOW')
 
-match DB_ENGINE:
-    case 'sqlite' if not GITHUB_WORKFLOW:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.sqlite3',
-                'NAME'  : BASE_DIR / 'db.sqlite3',
-            }
+if DB_ENGINE == 'sqlite' and not GITHUB_WORKFLOW:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME'  : BASE_DIR / 'db.sqlite3',
         }
-    case 'postgresql' if not GITHUB_WORKFLOW:
-        DATABASES = {
-            'default': {
-                'ENGINE'  : 'django.db.backends.postgresql_psycopg2',
-                'NAME'    : env.str('DB_NAME', 'thyme_and_budget'),
-                'USER'    : env.str('DB_USER', 'mariadb'),
-                'PASSWORD': env.str('DB_PASSWORD', 'mariadb'),
-                'HOST'    : env.str('DB_HOST', 'localhost'),
-                'PORT'    : env.str('DB_PORT', '5432'),
-            }
+    }
+elif DB_ENGINE == 'postgresql' and not GITHUB_WORKFLOW:
+    DATABASES = {
+        'default': {
+            'ENGINE'  : 'django.db.backends.postgresql',
+            'NAME'    : env.str('DB_NAME', 'thyme_and_budget'),
+            'USER'    : env.str('DB_USER', 'mariadb'),
+            'PASSWORD': env.str('DB_PASSWORD', 'mariadb'),
+            'HOST'    : env.str('DB_HOST', 'localhost'),
+            'PORT'    : env.str('DB_PORT', '5432'),
         }
-    case 'mysql' if not GITHUB_WORKFLOW:
-        DATABASES = {
-            'default': {
-                'ENGINE'  : 'django.db.backends.mysql',
-                'NAME'    : env.str('DB_NAME', 'thyme_and_budget'),
-                'USER'    : env.str('DB_USER', 'mariadb'),
-                'PASSWORD': env.str('DB_PASSWORD', 'mariadb'),
-                'HOST'    : env.str('DB_HOST', 'localhost'),
-                'PORT'    : env.str('DB_PORT', '3306'),
-                'OPTIONS' : {
-                    'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-                },
-            }
+    }
+elif DB_ENGINE == 'mysql' and not GITHUB_WORKFLOW:
+    DATABASES = {
+        'default': {
+            'ENGINE'  : 'django.db.backends.mysql',
+            'NAME'    : env.str('DB_NAME', 'thyme_and_budget'),
+            'USER'    : env.str('DB_USER', 'mariadb'),
+            'PASSWORD': env.str('DB_PASSWORD', 'mariadb'),
+            'HOST'    : env.str('DB_HOST', 'localhost'),
+            'PORT'    : env.str('DB_PORT', '3306'),
+            'OPTIONS' : {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
         }
-    case _ if GITHUB_WORKFLOW:
-        DATABASES = {
-            'default': {
-                'ENGINE'  : 'django.db.backends.postgresql',
-                'NAME'    : 'github-actions',
-                'USER'    : 'postgres',
-                'PASSWORD': 'postgres',
-                'HOST'    : 'localhost',
-                'PORT'    : '5432'
-            }
+    }
+elif GITHUB_WORKFLOW:
+    DATABASES = {
+        'default': {
+            'ENGINE'  : 'django.db.backends.postgresql',
+            'NAME'    : 'github-actions',
+            'USER'    : 'postgres',
+            'PASSWORD': 'postgres',
+            'HOST'    : 'localhost',
+            'PORT'    : '5432'
         }
+    }
 
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
@@ -231,7 +228,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+# STATIC_URL = env('STATIC_URL', default='/static/')
+STATIC_URL = 'http://storage.googleapis.com/thyme-and-budget_thyme-and-budget/static/'
+STATIC_ROOT = env('STATIC_ROOT', default=os.path.join(BASE_DIR, 'static'))
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
