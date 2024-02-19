@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from ..models import Collection
@@ -23,7 +24,7 @@ class CollectionViewSet(viewsets.ModelViewSet):
         return None
 
     def _check_donor(self, request):
-        if not request.user.is_donor:
+        if not get_user_model().objects.get(id=request.user.id).role == 'donor':
             return Response({"error": "Only donors can perform this action."}, status=status.HTTP_403_FORBIDDEN)
         return None
 
@@ -40,23 +41,18 @@ class CollectionViewSet(viewsets.ModelViewSet):
             return Response({"error": "Invalid data. Please check your input and try again."},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        auth_response = self._check_authentication(request)
-        if auth_response:
-            return auth_response
-
-        user = get_user_model().objects.get(id=request.user.id)
-        if user.phone_number:
-            validation_response = self._handle_validation_errors(serializer, user.phone_number,
-                                                                 request.data['quantity'])
-            if validation_response:
-                return validation_response
+        if request.user.is_authenticated:
+            user = get_user_model().objects.get(id=request.user.id)
+            phone_number = user.phone_number
         elif 'phone_number' in request.data:
-            validation_response = self._handle_validation_errors(serializer, request.data['phone_number'],
-                                                                 request.data['quantity'])
-            if validation_response:
-                return validation_response
+            phone_number = request.data['phone_number']
         else:
-            return Response({"error": "User has no associated phone number."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Phone number is required for unauthenticated users."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        validation_response = self._handle_validation_errors(serializer, phone_number, request.data['quantity'])
+        if validation_response:
+            return validation_response
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -77,3 +73,14 @@ class CollectionViewSet(viewsets.ModelViewSet):
         if donor_response:
             return donor_response
         return super().retrieve(request, *args, **kwargs)
+
+    @action(detail=False, methods=['get'])
+    def collections_by_phone(self, request):
+        if not request.user.is_authenticated:
+            return Response({"error": "User is not authenticated."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        phone_number = get_user_model().objects.get(id=request.user.id).phone_number
+        collections = Collection.objects.filter(phone_number=phone_number)
+        serializer = self.get_serializer(collections, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
