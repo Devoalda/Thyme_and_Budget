@@ -144,62 +144,38 @@ WSGI_APPLICATION = 'thyme_and_budget.wsgi.application'
 DB_ENGINE = env.str('DB_ENGINE', 'sqlite')
 GITHUB_WORKFLOW = os.getenv('GITHUB_WORKFLOW')
 
-if 'RDS_DB_NAME' in os.environ:
-    DATABASES = {
-        'default': {
-            'ENGINE'  : 'django.db.backends.postgresql_psycopg2',
-            'NAME'    : os.environ['RDS_DB_NAME'],
-            'USER'    : os.environ['RDS_USERNAME'],
-            'PASSWORD': os.environ['RDS_PASSWORD'],
-            'HOST'    : os.environ['RDS_HOSTNAME'],
-            'PORT'    : os.environ['RDS_PORT'],
-        }
+# Database configuration
+DATABASES = {}
+
+# Check if running on GitHub Workflow
+if os.getenv('GITHUB_WORKFLOW'):
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'github-actions',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432'
     }
+# Check if running on AWS RDS
+elif 'RDS_DB_NAME' in os.environ:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ['RDS_DB_NAME'],
+        'USER': os.environ['RDS_USERNAME'],
+        'PASSWORD': os.environ['RDS_PASSWORD'],
+        'HOST': os.environ['RDS_HOSTNAME'],
+        'PORT': os.environ['RDS_PORT'],
+    }
+# Default local PostgreSQL configuration
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE'  : 'django.db.backends.postgresql_psycopg2',
-            'NAME'    : env('DB_NAME', default='thyme_and_budget'),
-            'USER'    : env('DB_USER', default='postgres'),
-            'PASSWORD': env('DB_PASSWORD', default='postgres'),
-            'HOST'    : env('DB_HOST', default='localhost'),
-            'PORT'    : env('DB_PORT', default='5432'),
-        }
-    }
-
-# if DB_ENGINE == 'sqlite' and not GITHUB_WORKFLOW:
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.sqlite3',
-#             'NAME'  : BASE_DIR / 'db.sqlite3',
-#         }
-#     }
-# elif DB_ENGINE == 'postgresql' and not GITHUB_WORKFLOW:
-
-# elif DB_ENGINE == 'mysql' and not GITHUB_WORKFLOW:
-#     DATABASES = {
-#         'default': {
-#             'ENGINE'  : 'django.db.backends.mysql',
-#             'NAME'    : env.str('DB_NAME', 'thyme_and_budget'),
-#             'USER'    : env.str('DB_USER', 'mariadb'),
-#             'PASSWORD': env.str('DB_PASSWORD', 'mariadb'),
-#             'HOST'    : env.str('DB_HOST', 'localhost'),
-#             'PORT'    : env.str('DB_PORT', '3306'),
-#             'OPTIONS' : {
-#                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-#             },
-#         }
-#     }
-if GITHUB_WORKFLOW:
-    DATABASES = {
-        'default': {
-            'ENGINE'  : 'django.db.backends.postgresql',
-            'NAME'    : 'github-actions',
-            'USER'    : 'postgres',
-            'PASSWORD': 'postgres',
-            'HOST'    : 'localhost',
-            'PORT'    : '5432'
-        }
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': env('DB_NAME', default='thyme_and_budget'),
+        'USER': env('DB_USER', default='postgres'),
+        'PASSWORD': env('DB_PASSWORD', default='postgres'),
+        'HOST': env('DB_HOST', default='localhost'),
+        'PORT': env('DB_PORT', default='5432'),
     }
 
 PASSWORD_HASHERS = [
