@@ -1,6 +1,6 @@
 branch-defaults:
   master:
-    environment: null
+    environment: thyme-and-budget-dev
     group_suffix: null
 global:
   application_name: thyme_and_budget
