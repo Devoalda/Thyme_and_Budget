@@ -471,3 +471,8 @@ cython_debug/
 .idea/
 
 .env
+static/
+app.yaml
+cloud-sql-proxy
+thyme-and-budget.yaml
+thyme-and-budget-bad4fc29e61a.json

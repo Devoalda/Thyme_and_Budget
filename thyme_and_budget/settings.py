@@ -228,8 +228,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-# STATIC_URL = env('STATIC_URL', default='/static/')
-STATIC_URL = 'http://storage.googleapis.com/thyme-and-budget_thyme-and-budget/static/'
+STATIC_URL = env('STATIC_URL', default='/static/')
+# STATIC_URL = 'http://storage.googleapis.com/thyme-and-budget_thyme-and-budget/static/'
 STATIC_ROOT = env('STATIC_ROOT', default=os.path.join(BASE_DIR, 'static'))
 
 # Default primary key field type

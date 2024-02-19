@@ -1,8 +1,9 @@
 from django.contrib.auth import authenticate
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import update_last_login
 from rest_framework import serializers
-from rest_framework_simplejwt.tokens import RefreshToken, AuthUser
 from rest_framework.exceptions import PermissionDenied
+from rest_framework_simplejwt.tokens import RefreshToken, AuthUser
 
 from .models import User, Role
 
@@ -34,15 +35,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         auth_user = User.objects.create_user(**validated_data)
 
-        return {
-            'username': auth_user.username,
-            'first_name': auth_user.first_name,
-            'last_name': auth_user.last_name,
-            'email': auth_user.email,
-            'role': auth_user.role,
-            'phone_number': auth_user.phone_number,
-            'created_date': auth_user.created_date,
-        }
+        return {'username'    : auth_user.username, 'first_name': auth_user.first_name,
+                'last_name'   : auth_user.last_name, 'email': auth_user.email, 'role': auth_user.role,
+                'phone_number': auth_user.phone_number, 'created_date': auth_user.created_date, }
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -82,10 +77,14 @@ class UserLoginSerializer(serializers.Serializer):
 
 
 class UserListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AuthUser
-        fields = ('username', 'role')
+    name = serializers.CharField(required=False)
+    email = serializers.EmailField(required=False)
+    phone_number = serializers.CharField(required=False)
 
+    class Meta:
+        model = get_user_model()
+        fields = ('username', 'name', 'email', 'phone_number', 'role', 'date_joined', 'created_date', 'modified_date')
+        read_only_fields = ('date_joined', 'created_date', 'modified_date')
 
 # class RegisterSerializer(serializers.ModelSerializer):
 #     class Meta:
