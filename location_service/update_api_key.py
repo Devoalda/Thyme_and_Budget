@@ -6,6 +6,7 @@ import environ
 def update_api_key():
     BASE_DIR = Path(__file__).resolve().parent.parent
     environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+    env = os.path.join(BASE_DIR, '.env')
 
     url = "https://www.onemap.gov.sg/api/auth/post/getToken"
 
@@ -20,7 +21,7 @@ def update_api_key():
         return
 
     # update the token in .env file
-    with open(os.path.join(BASE_DIR, '.env'), 'r') as file:
+    with open(env, 'r') as file:
         data = file.readlines()
         # find the line with ONE_MAP_TOKEN
         for i in range(len(data)):
@@ -29,9 +30,9 @@ def update_api_key():
                 break
 
         # if the line is not found, add it to the end of the file
-        data.append("ONEMAP_API_KEY=" + response.json()['access_token'] + "\n")
+        data.append("\nONEMAP_API_KEY=" + response.json()['access_token'] + "\n")
 
-    with open(os.path.join(BASE_DIR, '.env'), 'w') as file:
+    with open(env, 'w') as file:
         file.writelines(data)
 
     print("Token updated successfully!")
