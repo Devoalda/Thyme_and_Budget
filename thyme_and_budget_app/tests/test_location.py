@@ -14,14 +14,16 @@ class LocationTests(APITestCase):
         self.user = User.objects.create_user(username='testuser', password='testpassword')
         self.client.force_authenticate(user=self.user)
 
-        self.location_data = {'postal_code': '12345', 'username': 'testuser'}
+        self.location_data = {'postal_code': '569830', 'username': 'testuser'}
 
         # Create a location
-        self.location = Location.objects.create(postal_code='12345', donor=self.user)
+        self.location = Location.objects.create(postal_code='138683', donor=self.user)
 
     def test_create_location(self):
         response = self.client.post(reverse('location-list'), self.location_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['address'], "180 ANG MO KIO AVENUE 8 NANYANG POLYTECHNIC SINGAPORE 569830")
+        self.assertEqual(response.data['location'], "103.848423445403,1.3778190310896")
 
     def test_read_location(self):
         response = self.client.get(reverse('location-detail', kwargs={'pk': self.location.pk}))
