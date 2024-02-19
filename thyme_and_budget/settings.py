@@ -16,7 +16,7 @@ import environ
 
 env = environ.Env(
         # set casting, default value
-        DEBUG=(bool, False)
+        DEBUG=(bool, True)
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -147,18 +147,18 @@ GITHUB_WORKFLOW = os.getenv('GITHUB_WORKFLOW')
 if 'RDS_DB_NAME' in os.environ:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': os.environ['RDS_DB_NAME'],
-            'USER': os.environ['RDS_USERNAME'],
+            'ENGINE'  : 'django.db.backends.postgresql_psycopg2',
+            'NAME'    : os.environ['RDS_DB_NAME'],
+            'USER'    : os.environ['RDS_USERNAME'],
             'PASSWORD': os.environ['RDS_PASSWORD'],
-            'HOST': os.environ['RDS_HOSTNAME'],
-            'PORT': os.environ['RDS_PORT'],
+            'HOST'    : os.environ['RDS_HOSTNAME'],
+            'PORT'    : os.environ['RDS_PORT'],
         }
     }
 else:
     DATABASES = {
         'default': {
-            'ENGINE'  : 'django.db.backends.postgresql',
+            'ENGINE'  : 'django.db.backends.postgresql_psycopg2',
             'NAME'    : env('DB_NAME', default='thyme_and_budget'),
             'USER'    : env('DB_USER', default='postgres'),
             'PASSWORD': env('DB_PASSWORD', default='postgres'),
@@ -167,16 +167,15 @@ else:
         }
     }
 
-
-if DB_ENGINE == 'sqlite' and not GITHUB_WORKFLOW:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME'  : BASE_DIR / 'db.sqlite3',
-        }
-    }
+# if DB_ENGINE == 'sqlite' and not GITHUB_WORKFLOW:
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.sqlite3',
+#             'NAME'  : BASE_DIR / 'db.sqlite3',
+#         }
+#     }
 # elif DB_ENGINE == 'postgresql' and not GITHUB_WORKFLOW:
-   
+
 # elif DB_ENGINE == 'mysql' and not GITHUB_WORKFLOW:
 #     DATABASES = {
 #         'default': {
@@ -191,7 +190,7 @@ if DB_ENGINE == 'sqlite' and not GITHUB_WORKFLOW:
 #             },
 #         }
 #     }
-elif GITHUB_WORKFLOW:
+if GITHUB_WORKFLOW:
     DATABASES = {
         'default': {
             'ENGINE'  : 'django.db.backends.postgresql',
@@ -254,3 +253,26 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+log_file_path = os.getenv('LOG_FILE_PATH', './local.log')
+if not os.path.exists(os.path.dirname(log_file_path)):
+    os.makedirs(os.path.dirname(log_file_path))
+
+LOGGING = {
+    'version' : 1,
+
+    'handlers': {
+        'logfile': {
+            'level'   : 'DEBUG',
+            'class'   : 'logging.handlers.RotatingFileHandler',
+            'filename': log_file_path,
+        },
+    },
+    'loggers' : {
+        'debugger': {
+            'level'    : 'DEBUG',
+            'handlers' : ['logfile'],
+            'propagate': False,
+        },
+    }
+}
