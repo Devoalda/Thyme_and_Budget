@@ -253,26 +253,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
-
-log_file_path = os.getenv('LOG_FILE_PATH', './local.log')
-if not os.path.exists(os.path.dirname(log_file_path)):
-    os.makedirs(os.path.dirname(log_file_path))
-
-LOGGING = {
-    'version' : 1,
-
-    'handlers': {
-        'logfile': {
-            'level'   : 'DEBUG',
-            'class'   : 'logging.handlers.RotatingFileHandler',
-            'filename': log_file_path,
-        },
-    },
-    'loggers' : {
-        'debugger': {
-            'level'    : 'DEBUG',
-            'handlers' : ['logfile'],
-            'propagate': False,
-        },
-    }
-}
