@@ -1,4 +1,5 @@
 import base64
+from datetime import datetime, timedelta
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
@@ -18,15 +19,27 @@ class FoodTests(APITestCase):
         cls.location = Location.objects.create(postal_code='12345', donor_id=cls.user.id)
         with open('thyme_and_budget_app/tests/test_image.jpg', 'rb') as image_file:
             cls.image = base64.b64encode(image_file.read())  # remove the decode('utf-8') call here
-            data = ContentFile(cls.image, name='temp.jpg')  # create a Django ContentFile
-        cls.food_data = {'name': '1234', 'expiry_date': '2024-02-16', 'quantity': 100000, 'image': data, }
-
-        cls.food_item = FoodItem.objects.create(name='1234', expiry_date='2024-02-16', quantity=100000, image=data,
-                                                location=cls.location)
+            cls.data = ContentFile(cls.image, name='temp.jpg')  # create a Django ContentFile
 
     def setUp(self):
+        """
+        Set up the test case with a logged-in user, food data, and a FoodItem object.
+        """
+        # Set up the client and authenticate the user
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
+
+        # Calculate the expiry date 30 days from now
+        current_date = datetime.now()
+        expiry_date = current_date + timedelta(days=30)
+        expiry_date_str = expiry_date.strftime('%Y-%m-%d')
+
+        # Set up the food data
+        self.food_data = {'name': '1234', 'expiry_date': expiry_date_str, 'quantity': 100000, 'image': self.data, }
+
+        # Create a FoodItem object
+        self.food_item = FoodItem.objects.create(name='1234', expiry_date=expiry_date_str, quantity=100000,
+                image=self.data, location=self.location)
 
     def test_authenticated_user_can_read_food(self):
         response = self.client.get(reverse('food-detail', kwargs={'pk': self.food_item.pk}))
