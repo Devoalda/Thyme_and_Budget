@@ -58,10 +58,10 @@ class FoodTests(APITestCase):
         response = self.client.delete(reverse('food-detail', kwargs={'pk': self.food_item.pk}))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-    def test_unauthenticated_user_cannot_read_food(self):
+    def test_unauthenticated_user_can_read_all_food(self):
         self.client.logout()
-        response = self.client.get(reverse('food-detail', kwargs={'pk': self.food_item.pk}))
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.get(reverse('food-list'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_unauthenticated_user_cannot_update_food(self):
         self.client.logout()
@@ -69,10 +69,10 @@ class FoodTests(APITestCase):
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_unauthenticated_user_cannot_read_food(self):
+    def test_unauthenticated_user_can_read_food(self):
         self.client.logout()
         response = self.client.get(reverse('food-detail', kwargs={'pk': self.food_item.pk}))
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_cannot_update_non_existent_food(self):
         response = self.client.put(reverse('food-detail', kwargs={'pk': 999}), self.food_data, format='json')

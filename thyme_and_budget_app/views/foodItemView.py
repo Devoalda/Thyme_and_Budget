@@ -22,45 +22,56 @@ class IsOwnerOrAdmin(permissions.BasePermission):
 
 class FoodItemViewSet(viewsets.ModelViewSet):
     serializer_class = FoodItemSerializer
-    permission_classes = [IsAuthenticated]
     parser_classes = [JSONParser]
+
+    def check_permissions(self, request):
+        self.get_permissions()
+        super(FoodItemViewSet, self).check_permissions(request)
 
     def get_queryset(self):
         return FoodItem.objects.filter(expiry_date__gt=timezone.now(), quantity__gt=0)
 
+    def list(self, request, *args, **kwargs):
+        return self.get_response()
+
     def get_permissions(self):
-        if self.action in ['update', 'partial_update']:
+        if self.action in ['list', 'retrieve']:
+            self.permission_classes = [permissions.AllowAny]
+        elif self.action in ['update', 'partial_update']:
             self.permission_classes = [IsOwnerOrAdmin]
+        else:
+            self.permission_classes = [IsAuthenticated]
         return super(FoodItemViewSet, self).get_permissions()
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = get_user_model().objects.get(id=request.user.id)
-        location = user.location_set.first()
-
-        if location is not None:
-            serializer.save(location=location)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response({"error": "User has no associated location"}, status=status.HTTP_400_BAD_REQUEST)
+        return self.perform_action(request, status.HTTP_201_CREATED, {"error": "User has no associated location"},
+                                   status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return self.perform_action(request, status.HTTP_200_OK)
 
     def partial_update(self, request: JSONParser, *args, **kwargs) -> Response:
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return self.perform_action(request, status.HTTP_200_OK, partial=True)
 
     @action(detail=False, methods=['get'])
     def user_food_items(self, request, *args, **kwargs):
         user_food_items = FoodItem.objects.filter(location__donor=request.user)
         serializer = self.get_serializer(user_food_items, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def get_response(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def perform_action(self, request, success_status, error_response=None, error_status=None, partial=False):
+        serializer = self.get_serializer(self.get_object(), data=request.data, partial=partial)
+        if serializer.is_valid(raise_exception=True):
+            user = get_user_model().objects.get(id=request.user.id)
+            location = user.location_set.first()
+            if location is not None:
+                serializer.save(location=location)
+                return Response(serializer.data, status=success_status)
+            elif error_response and error_status:
+                return Response(error_response, status=error_status)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
