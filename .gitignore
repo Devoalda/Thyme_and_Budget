@@ -476,3 +476,8 @@ app.yaml
 cloud-sql-proxy
 thyme-and-budget.yaml
 thyme-and-budget-bad4fc29e61a.json
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
