@@ -6,5 +6,5 @@ from ..models import Collection
 class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
-        fields = ['id', 'phone_number', 'quantity', 'food_item']
+        fields = ['id', 'phone_number', 'quantity', 'food_item', 'modified_at']
         extra_kwargs = {'phone_number': {'required': False}, }

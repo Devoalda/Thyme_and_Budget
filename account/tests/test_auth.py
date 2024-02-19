@@ -89,7 +89,6 @@ class UserRetrieveUpdateDestroyViewTest(BaseViewTest):
         data = {"username": "updateduser", # Add other fields here
         }
         response = self.client.put(reverse('users'), data, format='json')
-        print(f"response: {response.data}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_delete_user(self):

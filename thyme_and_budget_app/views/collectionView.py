@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -19,7 +20,7 @@ class CollectionViewSet(viewsets.ModelViewSet):
         return None
 
     def _check_admin(self, request):
-        if not request.user.is_staff:
+        if not request.user.is_staff or not request.user.is_superuser:
             return Response({"error": "Only administrators can perform this action."}, status=status.HTTP_403_FORBIDDEN)
         return None
 
@@ -60,6 +61,14 @@ class CollectionViewSet(viewsets.ModelViewSet):
         admin_response = self._check_admin(request)
         if admin_response:
             return admin_response
+
+        if not request.data:  # If the request data is empty
+            instance = self.get_object()
+            instance.updated_at = timezone.now()  # Set the updated_at field to the current time
+            instance.save()
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
