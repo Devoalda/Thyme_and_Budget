@@ -51,6 +51,7 @@ These instructions will get you a copy of the project up and running on your loc
     CREATE DATABASE thyme_and_budget;
     CREATE ROLE thyme_and_budget_user WITH LOGIN PASSWORD 'password';
     GRANT ALL ON DATABASE thyme_and_budget TO thyme_and_budget_user;
+    ALTER USER thyme_and_budget_user CREATEDB;
    ```
 
 4. Run migrations:

@@ -11,12 +11,16 @@ class GeoOnemap:
         self.HEADER = None
         self.api_key = None
         self.BASE_DIR = None
+        self.longitude = None
+        self.latitude = None
+        self.address = None
         self.read_env()
         if postal_code:
             response = self.get_location_from_postal(self.postal_code)
-            self.longitude = response.json()['results'][0]['LONGITUDE']
-            self.latitude = response.json()['results'][0]['LATITUDE']
-            self.address = response.json()['results'][0]['ADDRESS']
+            if response.status_code == 200 and response.json()['found'] > 0:
+                self.longitude = response.json()['results'][0]['LONGITUDE']
+                self.latitude = response.json()['results'][0]['LATITUDE']
+                self.address = response.json()['results'][0]['ADDRESS']
 
     def read_env(self):
         self.BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,7 +40,11 @@ class GeoOnemap:
         """
 
         url = "https://www.onemap.gov.sg/api/common/elastic/search?searchVal={}&returnGeom=Y&getAddrDetails=Y"
-        return requests.request("GET", url.format(postal_code), headers=self.HEADER)
+        response = requests.request("GET", url.format(postal_code), headers=self.HEADER)
+        if response.status_code == 200:
+            return response
+        else:
+            raise Exception('Error in get_location_from_postal: ' + response.text)
 
         # while True:
         #     response = requests.request("GET", url.format(postal_code), headers=self.HEADER)
