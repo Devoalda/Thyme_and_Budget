@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser
@@ -23,7 +24,9 @@ class FoodItemViewSet(viewsets.ModelViewSet):
     serializer_class = FoodItemSerializer
     permission_classes = [IsAuthenticated]
     parser_classes = [JSONParser]
-    queryset = FoodItem.objects.all()
+
+    def get_queryset(self):
+        return FoodItem.objects.filter(expiry_date__gt=timezone.now(), quantity__gt=0)
 
     def get_permissions(self):
         if self.action in ['update', 'partial_update']:

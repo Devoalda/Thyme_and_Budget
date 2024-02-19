@@ -41,8 +41,20 @@ class FoodItemSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(Base64ImageField)
     def get_location(self, obj):
+        # Check if the FoodItem object has a location
         if obj.location:
+            # Serialize the location data
             location_data = LocationSerializer(obj.location).data
-            return location_data['address'] if 'address' in location_data else location_data['postal_code']
+
+            # Check if 'address' is in the location data and is not an empty string
+            if 'address' in location_data:
+                address = location_data['address'].strip()
+                if address != '':
+                    return address
+
+            # If 'address' is not in the location data or is an empty string, return 'postal_code'
+            return location_data['postal_code']
+
+        # If the FoodItem object does not have a location, return 'No location'
         else:
             return 'No location'
