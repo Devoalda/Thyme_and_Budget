@@ -41,6 +41,19 @@ class FoodTests(APITestCase):
         self.food_item = FoodItem.objects.create(name='1234', expiry_date=expiry_date_str, quantity=100000,
                 image=self.data, location=self.location)
 
+    def test_authenticated_user_can_create_food(self):
+        # Modify image to be a base64 string
+        self.food_data['image'] = self.image.decode('utf-8')
+
+        response = self.client.post(reverse('food-list'), self.food_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_unauthenticated_user_cannot_create_food(self):
+        self.client.logout()
+        self.food_data['image'] = self.image.decode('utf-8')
+        response = self.client.post(reverse('food-list'), self.food_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
     def test_authenticated_user_can_read_food(self):
         response = self.client.get(reverse('food-detail', kwargs={'pk': self.food_item.pk}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
