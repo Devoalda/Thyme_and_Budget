@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth import logout
 from django.http import JsonResponse
-from django.views import View
 from rest_framework import permissions, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -110,12 +109,17 @@ class UserRetrieveUpdateDestroyView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CheckUserLoginView(APIView):
+
+class CheckUserStatusView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
         if request.user.is_authenticated:
-            return JsonResponse({"is_logged_in": True})
+            return JsonResponse({
+                "is_logged_in": True,
+                "username": request.user.username,
+                "role": request.user.role,
+            })
         else:
             return JsonResponse({"is_logged_in": False})
 
@@ -126,19 +130,3 @@ class LogoutView(APIView):
     def post(self, request):
         logout(request)
         return Response({"message": "Successfully logged out"}, status=status.HTTP_200_OK)
-
-# class RegisterApi(generics.GenericAPIView):
-#     serializer_class = UserRegistrationSerializer
-#     permission_classes = [permissions.AllowAny]
-#
-#     def post(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         if serializer.is_valid():
-#             user = serializer.save()
-#             return Response({"user"   : UserSerializer(user, context=self.get_serializer_context()).data,
-#                              "message": "User Created Successfully. Now perform Login to get your token",
-#                              "user_id": user.id, "created_at": timezone.now(), }, status=status.HTTP_201_CREATED)
-#         else:
-#             return Response(
-#                     {"errors": serializer.errors, "message": "Registration failed. Please check the provided data.", },
-#                     status=status.HTTP_400_BAD_REQUEST)

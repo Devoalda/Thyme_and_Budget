@@ -77,6 +77,7 @@ class UserLoginSerializer(serializers.Serializer):
 
 
 class UserListSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=False)
     name = serializers.CharField(required=False)
     email = serializers.EmailField(required=False)
     phone_number = serializers.CharField(required=False)
@@ -86,22 +87,11 @@ class UserListSerializer(serializers.ModelSerializer):
         fields = ('username', 'name', 'email', 'phone_number', 'role', 'date_joined', 'created_date', 'modified_date')
         read_only_fields = ('date_joined', 'created_date', 'modified_date')
 
-# class RegisterSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ('id', 'username', 'password', 'first_name', 'last_name', 'email', 'role', 'phone_number')
-#         extra_kwargs = {'password': {'write_only': True}, }
-#
-#     def create(self, validated_data):
-#         user = User.objects.create_user(username=validated_data['username'], password=validated_data['password'],
-#                                         first_name=validated_data['first_name'], last_name=validated_data['last_name'],
-#                                         email=validated_data['email'], role=validated_data['role'],
-#                                         phone_number=validated_data['phone_number'])
-#         return user
+    def validate(self, data):
+        # Check if 'role' or 'username' is in the data
+        if 'role' in data or 'username' in data:
+            raise serializers.ValidationError("Updating 'role' and 'username' is not allowed.")
+        return data
 
-
-# class UserSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ('id', 'username', 'first_name', 'last_name', 'email', 'role', 'phone_number')
-#         extra_kwargs = {'password': {'write_only': True}, }
+    def update(self, instance, validated_data):
+        return super().update(instance, validated_data)

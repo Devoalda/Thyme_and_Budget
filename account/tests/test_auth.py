@@ -28,9 +28,9 @@ class UserRegistrationTest(BaseViewTest):
 
     def test_register_user(self):
         # Test for user registration
-        data = {"username": "arbitrary_username", "password": "arbitrary_password",
-            "first_name"  : "arbitrary_first_name", "last_name": "arbitrary_last_name",
-            "email"       : "arbitrary_email@example.com", "phone_number": "1234567890", "role": "donor", }
+        data = {"username"  : "arbitrary_username", "password": "arbitrary_password",
+                "first_name": "arbitrary_first_name", "last_name": "arbitrary_last_name",
+                "email"     : "arbitrary_email@example.com", "phone_number": "1234567890", "role": "donor", }
         self.response = self.client.post(reverse("register"), data, format="json")
         self.assertEqual(self.response.status_code, status.HTTP_201_CREATED)
 
@@ -62,7 +62,6 @@ class UserAuthenticationTest(BaseViewTest):
         self.response = self.client.post(reverse("token_obtain_pair"), data, format="json")
         self.assertEqual(self.response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-
     def test_is_user_logged_in(self):
         # Test for user login
         self.client.login(username=USERNAME, password=PASSWORD)
@@ -72,13 +71,14 @@ class UserAuthenticationTest(BaseViewTest):
         # Test for user status
         response = self.client.get(reverse('check_user_login'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {"is_logged_in": True})
+        self.assertEqual(response.json()["is_logged_in"], True)
 
     def test_unauthenticated_user_status(self):
         # Test for unauthenticated user status
         response = self.client.get(reverse('check_user_login'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {"is_logged_in": False})
+
 
 class UserLogoutTest(BaseViewTest):
 
@@ -109,10 +109,17 @@ class UserRetrieveUpdateDestroyViewTest(BaseViewTest):
     def test_update_user(self):
         # Test for updating a user
         self.client.login(username=USERNAME, password=PASSWORD)
-        data = {"username": "updateduser", "password": "updatedpassword", "first_name": "test", "last_name": "user",
-                "email"   : "test@email2.com", "phone_number": "1234567890", }
+        data = {"password"    : "updatedpassword", "first_name": "test", "last_name": "user",
+                "email"       : "test@email2.com", "phone_number": "1234567890", }
         response = self.client.put(reverse('users'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_user_cannot_update_role_and_username(self):
+        # Test for user not being able to update their role and username
+        self.client.login(username=USERNAME, password=PASSWORD)
+        data = {"username": "updatedusername", "role": "collector"}
+        response = self.client.put(reverse('users'), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_delete_user(self):
         # Test for deleting a user
