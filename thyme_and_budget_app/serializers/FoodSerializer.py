@@ -15,11 +15,11 @@ class FoodItemSerializer(serializers.ModelSerializer):
     image = Base64ImageField(
             max_length=None, use_url=True,
     )
-    location = serializers.SerializerMethodField()
+    # location = serializers.SerializerMethodField()
 
     class Meta:
         model = FoodItem
-        fields = ['id', 'name', 'expiry_date', 'quantity', 'image', 'created_at', 'updated_at', 'location']
+        fields = ['id', 'name', 'expiry_date', 'quantity', 'image', 'created_at', 'updated_at', 'location', 'donor']
 
     def to_internal_value(self, data):
         if isinstance(data, QueryDict):
@@ -39,22 +39,22 @@ class FoodItemSerializer(serializers.ModelSerializer):
             representation['image'] = str(instance.image)
         return representation
 
-    @extend_schema_field(Base64ImageField)
-    def get_location(self, obj):
-        # Check if the FoodItem object has a location
-        if obj.location:
-            # Serialize the location data
-            location_data = LocationSerializer(obj.location).data
-
-            # Check if 'address' is in the location data and is not an empty string
-            if 'address' in location_data:
-                address = location_data['address'].strip()
-                if address != '':
-                    return address
-
-            # If 'address' is not in the location data or is an empty string, return 'postal_code'
-            return location_data['postal_code']
-
-        # If the FoodItem object does not have a location, return 'No location'
-        else:
-            return 'No location'
+    # @extend_schema_field(Base64ImageField)
+    # def get_location(self, obj):
+    #     # Check if the FoodItem object has a location
+    #     if obj.location:
+    #         # Serialize the location data
+    #         location_data = LocationSerializer(obj.location).data
+    #
+    #         # Check if 'address' is in the location data and is not an empty string
+    #         if 'address' in location_data:
+    #             address = location_data['address'].strip()
+    #             if address != '':
+    #                 return address
+    #
+    #         # If 'address' is not in the location data or is an empty string, return 'postal_code'
+    #         return location_data['postal_code']
+    #
+    #     # If the FoodItem object does not have a location, return 'No location'
+    #     else:
+    #         return 'No location'

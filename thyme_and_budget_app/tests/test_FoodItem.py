@@ -15,8 +15,9 @@ User = get_user_model()
 class FoodTests(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = User.objects.create_user(username='testuser', password='testpassword')
-        cls.location = Location.objects.create(postal_code='12345', donor_id=cls.user.id)
+        cls.user = User.objects.create_user(username='testuser', password='testpassword', role='donor')
+        # cls.location = Location.objects.create(postal_code='12345', donor_id=cls.user.id)
+        cls.location = Location.objects.create(postal_code='12345')
         with open('thyme_and_budget_app/tests/test_image.jpg', 'rb') as image_file:
             cls.image = base64.b64encode(image_file.read())  # remove the decode('utf-8') call here
             cls.data = ContentFile(cls.image, name='temp.jpg')  # create a Django ContentFile
@@ -35,11 +36,11 @@ class FoodTests(APITestCase):
         expiry_date_str = expiry_date.strftime('%Y-%m-%d')
 
         # Set up the food data
-        self.food_data = {'name': '1234', 'expiry_date': expiry_date_str, 'quantity': 100000, 'image': self.data, }
+        self.food_data = {'name': '1234', 'expiry_date': expiry_date_str, 'quantity': 100000, 'image': self.data, 'location': self.location.id}
 
         # Create a FoodItem object
         self.food_item = FoodItem.objects.create(name='1234', expiry_date=expiry_date_str, quantity=100000,
-                image=self.data, location=self.location)
+                image=self.data, location=self.location, donor=self.user)
 
     def test_authenticated_user_can_create_food(self):
         # Modify image to be a base64 string
@@ -78,7 +79,7 @@ class FoodTests(APITestCase):
 
     def test_unauthenticated_user_cannot_update_food(self):
         self.client.logout()
-        response = self.client.put(reverse('food-detail', kwargs={'pk': self.food_item.pk}), self.food_data,
+        response = self.client.patch(reverse('food-detail', kwargs={'pk': self.food_item.pk}), self.food_data,
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 

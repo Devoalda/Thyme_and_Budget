@@ -14,10 +14,10 @@ class LocationTests(APITestCase):
         self.user = User.objects.create_user(username='testuser', password='testpassword')
         self.client.force_authenticate(user=self.user)
 
-        self.location_data = {'postal_code': '569830', 'username': 'testuser'}
+        self.location_data = {'postal_code': '569830'}
 
         # Create a location
-        self.location = Location.objects.create(postal_code='138683', donor=self.user)
+        self.location = Location.objects.create(postal_code='138683')
 
     def test_create_location(self):
         response = self.client.post(reverse('location-list'), self.location_data, format='json')
