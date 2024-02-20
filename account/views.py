@@ -1,12 +1,13 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth import get_user_model
 from django.contrib.auth import logout
+from django.http import JsonResponse
+from django.views import View
 from rest_framework import permissions, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import (UserRegistrationSerializer, UserLoginSerializer)
+from .serializers import (UserRegistrationSerializer, UserLoginSerializer, UserListSerializer)
 
 
 class AuthUserRegistrationView(APIView):
@@ -44,9 +45,6 @@ class AuthUserLoginView(APIView):
                                               'role'    : serializer.validated_data['role']}}
 
             return Response(response, status=status_code)
-
-
-from .serializers import (UserRegistrationSerializer, UserLoginSerializer, UserListSerializer)
 
 
 class AuthUserRegistrationView(APIView):
@@ -110,6 +108,16 @@ class UserRetrieveUpdateDestroyView(APIView):
         instance = self.get_object()
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CheckUserLoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            return JsonResponse({"is_logged_in": True})
+        else:
+            return JsonResponse({"is_logged_in": False})
 
 
 class LogoutView(APIView):
