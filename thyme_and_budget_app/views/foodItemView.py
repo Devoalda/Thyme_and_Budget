@@ -5,7 +5,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from ..models import FoodItem
+from ..models import FoodItem, Location
 from ..serializers import FoodItemSerializer
 
 
@@ -49,10 +49,20 @@ class FoodItemViewSet(viewsets.ModelViewSet):
         user = request.user
         request.data['donor'] = user.id
 
+        # Extract the postal_code from the request data
+        postal_code = request.data.get('postal_code')
+
+        # Check if a Location with the same postal_code already exists
+        location, created = Location.objects.get_or_create(postal_code=postal_code)
+
+        # Use the existing or new Location for the FoodItem
+        request.data['location'] = location.id
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         # user = get_user_model().objects.get(id=request.user.id)
         # location = user.location_set.first()
         #
@@ -65,6 +75,15 @@ class FoodItemViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         user = request.user
         request.data['donor'] = user.id
+
+        # Extract the postal_code from the request data
+        postal_code = request.data.get('postal_code')
+
+        # Check if a Location with the same postal_code already exists
+        location, created = Location.objects.get_or_create(postal_code=postal_code)
+
+        # Use the existing or new Location for the FoodItem
+        request.data['location'] = location.id
 
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)

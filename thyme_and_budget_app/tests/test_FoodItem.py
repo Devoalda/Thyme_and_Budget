@@ -37,7 +37,7 @@ class FoodTests(APITestCase):
 
         # Set up the food data
         self.food_data = {'name': '1234', 'expiry_date': expiry_date_str, 'quantity': 100000, 'image': self.data,
-                          'location': self.location.id, 'donor': self.user.id}
+                          'postal_code': self.location.postal_code, 'donor': self.user.id}
 
         # Create a FoodItem object
         self.food_item = FoodItem.objects.create(name='1234', expiry_date=expiry_date_str, quantity=100000,
@@ -100,7 +100,7 @@ class FoodTests(APITestCase):
     def test_user_can_add_food_with_another_location(self):
         location2 = Location.objects.create(postal_code='138683')
         self.food_data['image'] = self.image.decode('utf-8')
-        self.food_data['location'] = location2.id
+        self.food_data['postal_code'] = location2.postal_code
         response = self.client.post(reverse('food-list'), self.food_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['location'], location2.postal_code)
