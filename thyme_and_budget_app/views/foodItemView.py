@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.utils import timezone
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
@@ -6,7 +5,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from ..models import FoodItem
+from ..models import FoodItem, Location
 from ..serializers import FoodItemSerializer
 
 
@@ -17,7 +16,8 @@ class IsOwnerOrAdmin(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # Check if the user is the owner of the object or an admin user
-        return obj.location.donor == request.user or request.user.is_staff
+        # return obj.location.donor == request.user or request.user.is_staff
+        return obj.donor == request.user or request.user.is_staff
 
 
 class FoodItemViewSet(viewsets.ModelViewSet):
@@ -46,18 +46,45 @@ class FoodItemViewSet(viewsets.ModelViewSet):
         return super(FoodItemViewSet, self).get_permissions()
 
     def create(self, request, *args, **kwargs):
+        user = request.user
+        request.data['donor'] = user.id
+
+        # Extract the postal_code from the request data
+        postal_code = request.data.get('postal_code')
+
+        # Check if a Location with the same postal_code already exists
+        location, created = Location.objects.get_or_create(postal_code=postal_code)
+
+        # Use the existing or new Location for the FoodItem
+        request.data['location'] = location.id
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = get_user_model().objects.get(id=request.user.id)
-        location = user.location_set.first()
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if location is not None:
-            serializer.save(location=location)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response({"error": "User has no associated location"}, status=status.HTTP_400_BAD_REQUEST)
+        # user = get_user_model().objects.get(id=request.user.id)
+        # location = user.location_set.first()
+        #
+        # if location is not None:
+        #     serializer.save(location=location)
+        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # else:
+        #     return Response({"error": "User has no associated location"}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
+        user = request.user
+        request.data['donor'] = user.id
+
+        # Extract the postal_code from the request data
+        postal_code = request.data.get('postal_code')
+
+        # Check if a Location with the same postal_code already exists
+        location, created = Location.objects.get_or_create(postal_code=postal_code)
+
+        # Use the existing or new Location for the FoodItem
+        request.data['location'] = location.id
+
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -65,6 +92,9 @@ class FoodItemViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def partial_update(self, request: JSONParser, *args, **kwargs) -> Response:
+        user = request.user
+        request.data['donor'] = user.id
+
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
