@@ -103,6 +103,6 @@ class FoodItemViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def user_food_items(self, request, *args, **kwargs):
-        user_food_items = FoodItem.objects.filter(location__donor=request.user)
+        user_food_items = FoodItem.objects.filter(donor_id=request.user.id)
         serializer = self.get_serializer(user_food_items, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
