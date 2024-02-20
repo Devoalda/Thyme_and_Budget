@@ -81,10 +81,13 @@ class UserListSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=False)
     email = serializers.EmailField(required=False)
     phone_number = serializers.CharField(required=False)
+    first_name = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
 
     class Meta:
         model = get_user_model()
-        fields = ('username', 'name', 'email', 'phone_number', 'role', 'date_joined', 'created_date', 'modified_date')
+        fields = ('username', 'name', 'email', 'phone_number', 'role', 'date_joined', 'created_date', 'modified_date',
+                    'first_name', 'last_name')
         read_only_fields = ('date_joined', 'created_date', 'modified_date')
 
     def validate(self, data):
