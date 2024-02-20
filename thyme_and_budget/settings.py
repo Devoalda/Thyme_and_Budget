@@ -53,8 +53,8 @@ INSTALLED_APPS = [
     'rest_framework',  # added for REST API
     'rest_framework_simplejwt',
     'account',
-    'drf_spectacular',
-    'drf_spectacular_sidecar',
+    # 'drf_spectacular',
+    # 'drf_spectacular_sidecar',
     'corsheaders',
     'thyme_and_budget_app',
 ]
@@ -108,15 +108,15 @@ CORS_ALLOW_ALL_ORIGINS = True
 # USE_X_FORWARDED_HOST = env.bool('USE_X_FORWARDED_HOST', default=False)
 # SECURE_PROXY_SSL_HEADER = ('X-Forwarded-For', 'https')
 
-SPECTACULAR_SETTINGS = {
-    'TITLE'                  : 'Thyme and Budget',
-    'DESCRIPTION'            : 'Thyme and Budget API',
-    'VERSION'                : '1.0.0',
-    'SERVE_INCLUDE_SCHEMA'   : False,
-    'SWAGGER_UI_DIST'        : 'SIDECAR',  # shorthand to use the sidecar instead
-    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
-    'REDOC_DIST'             : 'SIDECAR'
-}
+# SPECTACULAR_SETTINGS = {
+#     'TITLE'                  : 'Thyme and Budget',
+#     'DESCRIPTION'            : 'Thyme and Budget API',
+#     'VERSION'                : '1.0.0',
+#     'SERVE_INCLUDE_SCHEMA'   : False,
+#     'SWAGGER_UI_DIST'        : 'SIDECAR',  # shorthand to use the sidecar instead
+#     'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+#     'REDOC_DIST'             : 'SIDECAR'
+# }
 
 ROOT_URLCONF = 'thyme_and_budget.urls'
 
@@ -215,17 +215,32 @@ USE_I18N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-
-STATIC_URL = env('STATIC_URL', default='/static/')
-# STATIC_URL = 'http://storage.googleapis.com/thyme-and-budget_thyme-and-budget/static/'
-STATIC_ROOT = env('STATIC_ROOT', default=os.path.join(BASE_DIR, 'static'))
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+USE_S3 = env.bool('USE_S3', default=False)
+
+if USE_S3:
+    # aws settings
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+
+    # s3 static settings
+    STATIC_LOCATION = 'static'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
+    STATICFILES_STORAGE = 'thyme_and_budget.storage_backends.StaticStorage'
+
+    # s3 public media settings
+    PUBLIC_MEDIA_LOCATION = 'media'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
+    DEFAULT_FILE_STORAGE = 'thyme_and_budget.storage_backends.PublicMediaStorage'
+else:
+    STATIC_URL = '/staticfiles/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    MEDIA_URL = '/mediafiles/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles')
+
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
