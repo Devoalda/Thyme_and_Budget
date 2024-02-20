@@ -1,5 +1,6 @@
 from django.db import models
 from .locationModel import Location
+from django.conf import settings
 
 
 class FoodItem(models.Model):
@@ -9,6 +10,8 @@ class FoodItem(models.Model):
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     image = models.ImageField(upload_to='image/', blank=True, null=True)
+    donor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, to_field='id', db_column='donor_id',
+                              db_constraint=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

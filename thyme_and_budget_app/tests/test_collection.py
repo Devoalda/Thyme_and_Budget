@@ -15,13 +15,13 @@ class CollectionTests(APITestCase):
         self.superuser = User.objects.create_superuser(username='superuser',
                                                        password='superpassword')  # Create a superuser
         self.client.force_authenticate(user=self.user)
-        self.location = Location.objects.create(postal_code='12345', donor=self.user)
+        self.location = Location.objects.create(postal_code='12345')
 
         self.collection_data = {'phone_number': '1234567890', 'quantity': 100, 'food_item': 1}
 
         # Create a food item with id 1
         self.food_item = FoodItem.objects.create(id=1, name='1234', expiry_date='2024-02-16', quantity=100000,
-                                                 location=self.location)
+                                                 location=self.location, donor=self.user)
         # Create a collection
         response = self.client.post(reverse('collection-list'), self.collection_data, format='json')
         self.collection_id = response.data['id']  # Save the id of the created collection

@@ -22,5 +22,5 @@ class Command(BaseCommand):
                     role=role)
             if role == 'donor':
                 Location.objects.create(location=fake.city(), address=fake.address(),
-                        postal_code=fake.random_int(min=10000, max=99999),  # generates a random 5-digit number
-                        donor=user)
+                        postal_code=fake.random_int(min=10000, max=99999))  # generates a random 5-digit number
+                        # donor=user)
