@@ -103,4 +103,4 @@ class FoodTests(APITestCase):
         self.food_data['location'] = location2.id
         response = self.client.post(reverse('food-list'), self.food_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['location'], location2.id)
+        self.assertEqual(response.data['location'], location2.postal_code)
