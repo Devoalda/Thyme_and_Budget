@@ -50,8 +50,8 @@ class User(AbstractUser, PermissionsMixin):
     is_deleted = models.BooleanField(default=False)
     created_date = models.DateTimeField(default=timezone.now)
     modified_date = models.DateTimeField(default=timezone.now)
-    created_by = models.EmailField()
-    modified_by = models.EmailField()
+    # created_by = models.EmailField()
+    # modified_by = models.EmailField()
 
     objects = CustomUserManager()
 

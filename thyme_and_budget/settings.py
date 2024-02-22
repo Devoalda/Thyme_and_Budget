@@ -141,8 +141,8 @@ WSGI_APPLICATION = 'thyme_and_budget.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DB_ENGINE = env.str('DB_ENGINE', 'sqlite')
-GITHUB_WORKFLOW = os.getenv('GITHUB_WORKFLOW')
+# DB_ENGINE = env.str('DB_ENGINE', 'sqlite')
+# GITHUB_WORKFLOW = os.getenv('GITHUB_WORKFLOW')
 
 # Database configuration
 DATABASES = {}
@@ -180,9 +180,9 @@ else:
 
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
-    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
     "django.contrib.auth.hashers.ScryptPasswordHasher",
 ]
 

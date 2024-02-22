@@ -16,7 +16,8 @@ class Collection(models.Model):
     def save(self, *args, **kwargs):
         with transaction.atomic():
             food_item = FoodItem.objects.select_for_update().get(pk=self.food_item_id)
-            if food_item.quantity < int(self.quantity):
+            self.quantity = int(self.quantity)
+            if food_item.quantity < self.quantity:
                 raise ValidationError('Not enough quantity in FoodItem')
             food_item.quantity -= self.quantity
             food_item.save()

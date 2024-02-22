@@ -1,10 +1,9 @@
-from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
-from django.utils import timezone
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
+from rest_framework.exceptions import PermissionDenied, ValidationError
 
+from account.models import Role
 from ..models import Collection
 from ..serializers import CollectionSerializer
 
@@ -12,84 +11,65 @@ from ..serializers import CollectionSerializer
 class CollectionViewSet(viewsets.ModelViewSet):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
-    permission_classes = []
+    throttle_classes = [AnonRateThrottle]
 
-    def _check_authentication(self, request):
-        if not request.user.is_authenticated:
-            return Response({"error": "User is not authenticated."}, status=status.HTTP_401_UNAUTHORIZED)
-        return None
-
-    def _check_admin(self, request):
-        if not request.user.is_staff or not request.user.is_superuser:
-            return Response({"error": "Only administrators can perform this action."}, status=status.HTTP_403_FORBIDDEN)
-        return None
-
-    def _check_donor(self, request):
-        if not get_user_model().objects.get(id=request.user.id).role == 'donor':
-            return Response({"error": "Only donors can perform this action."}, status=status.HTTP_403_FORBIDDEN)
-        return None
-
-    def _handle_validation_errors(self, serializer, phone_number, quantity):
-        try:
-            serializer.save(phone_number=phone_number, quantity=quantity)
-        except ValidationError as e:
-            return Response({"error": str(e).strip('[]').strip('\'')}, status=status.HTTP_400_BAD_REQUEST)
-        return None
+    def _get_collections(self, user):
+        if user.is_superuser or user.is_staff:
+            return Collection.objects.all()
+        elif user.role == Role.DONOR.value:
+            return Collection.objects.filter(food_item__donor=user)
+        elif user.role == Role.RECEIVER.value:
+            return Collection.objects.filter(phone_number=user.phone_number)
+        else:
+            return Collection.objects.none()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        if not serializer.is_valid():
-            return Response({"error": "Invalid data. Please check your input and try again."},
-                            status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
 
-        if request.user.is_authenticated:
-            user = get_user_model().objects.get(id=request.user.id)
-            phone_number = user.phone_number
-        elif 'phone_number' in request.data:
-            phone_number = request.data['phone_number']
-        else:
-            return Response({"error": "Phone number is required for unauthenticated users."},
-                            status=status.HTTP_400_BAD_REQUEST)
+        phone_number = request.user.phone_number if request.user.is_authenticated else request.data.get('phone_number')
 
-        validation_response = self._handle_validation_errors(serializer, phone_number, request.data['quantity'])
-        if validation_response:
-            return validation_response
+        try:
+            instance = serializer.save(phone_number=phone_number)
+        except ValidationError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def update(self, request, *args, **kwargs):
-        admin_response = self._check_admin(request)
-        if admin_response:
-            return admin_response
-
-        if not request.data:  # If the request data is empty
-            instance = self.get_object()
-            instance.updated_at = timezone.now()  # Set the updated_at field to the current time
-            instance.save()
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data)
-
-        return super().update(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        admin_response = self._check_admin(request)
-        if admin_response:
-            return admin_response
-        return super().destroy(request, *args, **kwargs)
+        return Response(self.get_serializer(instance).data, status=status.HTTP_201_CREATED)
 
     def retrieve(self, request, *args, **kwargs):
-        donor_response = self._check_donor(request)
-        if donor_response:
-            return donor_response
+        collections = self._get_collections(request.user)
+        if self.get_object() not in collections:
+            raise PermissionDenied("You do not have permission to perform this action.")
         return super().retrieve(request, *args, **kwargs)
 
-    @action(detail=False, methods=['get'])
-    def collections_by_phone(self, request):
-        if not request.user.is_authenticated:
-            return Response({"error": "User is not authenticated."}, status=status.HTTP_401_UNAUTHORIZED)
-
-        phone_number = get_user_model().objects.get(id=request.user.id).phone_number
-        collections = Collection.objects.filter(phone_number=phone_number)
+    def list(self, request, *args, **kwargs):
+        collections = self._get_collections(request.user)
         serializer = self.get_serializer(collections, many=True)
+        return Response(serializer.data)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def update(self, request, *args, **kwargs):
+        if not request.user.is_superuser and not request.user.is_staff:
+            raise PermissionDenied("Only administrators can perform this action.")
+
+        partial = kwargs.pop('partial', True)  # Set partial=True to make the serializer a partial update serializer
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        if not request.user.is_superuser and not request.user.is_staff:
+            raise PermissionDenied("Only administrators can perform this action.")
+        return super().destroy(request, *args, **kwargs)
+
+    def get_permissions(self):
+        if self.action == 'create':
+            self.permission_classes = [permissions.AllowAny, ]
+        else:
+            self.permission_classes = [permissions.IsAuthenticated, ]
+        return super(CollectionViewSet, self).get_permissions()
