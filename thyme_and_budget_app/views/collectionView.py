@@ -1,7 +1,8 @@
+from django.db.models import Q
 from rest_framework import viewsets, status, permissions
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
-from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from account.models import Role
 from ..models import Collection
@@ -32,20 +33,52 @@ class CollectionViewSet(viewsets.ModelViewSet):
         try:
             instance = serializer.save(phone_number=phone_number)
         except ValidationError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            # Serialize the error message and return it
+            return Response({'Error': e.detail}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(self.get_serializer(instance).data, status=status.HTTP_201_CREATED)
 
-    def retrieve(self, request, *args, **kwargs):
-        collections = self._get_collections(request.user)
-        if self.get_object() not in collections:
-            raise PermissionDenied("You do not have permission to perform this action.")
-        return super().retrieve(request, *args, **kwargs)
+    def _apply_filters_and_sorting(self, collections, request):
+        # Get the filter parameters from the request
+        id_filter = request.query_params.get('id')
+        phone_number_filter = request.query_params.get('phone_number')
+        quantity_filter = request.query_params.get('quantity')
+
+        # Create Q objects for each filter
+        filters = Q()
+        if id_filter is not None:
+            filters |= Q(id=id_filter)
+        if phone_number_filter is not None:
+            filters |= Q(phone_number__icontains=phone_number_filter)
+        if quantity_filter is not None:
+            filters |= Q(quantity=quantity_filter)
+
+        # Apply the filters to the queryset
+        collections = collections.filter(filters)
+
+        # Get the sort parameters from the request
+        sort_by = request.query_params.get('sort_by')
+
+        # Apply the sorting to the queryset
+        if sort_by is not None:
+            sort_fields = sort_by.split(',')
+            collections = collections.order_by(*sort_fields)
+
+        return collections
 
     def list(self, request, *args, **kwargs):
         collections = self._get_collections(request.user)
+        collections = self._apply_filters_and_sorting(collections, request)
         serializer = self.get_serializer(collections, many=True)
         return Response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs):
+        collections = self._get_collections(request.user)
+        collections = self._apply_filters_and_sorting(collections, request)
+
+        if self.get_object() not in collections:
+            raise PermissionDenied("You do not have permission to perform this action.")
+        return super().retrieve(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
         if not request.user.is_superuser and not request.user.is_staff:

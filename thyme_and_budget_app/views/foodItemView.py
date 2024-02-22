@@ -1,10 +1,14 @@
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from account.models import Role
 from ..models import FoodItem, Location
 from ..serializers import FoodItemSerializer
 
@@ -23,6 +27,47 @@ class IsOwnerOrAdmin(permissions.BasePermission):
 class FoodItemViewSet(viewsets.ModelViewSet):
     serializer_class = FoodItemSerializer
     parser_classes = [JSONParser]
+    pagination_class = PageNumberPagination
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # Get the filter parameters from the request
+        id_filter = request.query_params.get('id')
+        name_filter = request.query_params.get('name')
+        date_filter = request.query_params.get('expiry_date')
+        donor_filter = request.query_params.get('donor')
+
+        # Create Q objects for each filter
+        filters = Q()
+        if id_filter is not None:
+            filters |= Q(id=id_filter)
+        if name_filter is not None:
+            filters |= Q(name__icontains=name_filter)
+        if date_filter is not None:
+            filters |= Q(expiry_date=date_filter)
+        if donor_filter is not None:
+            filters |= Q(donor__username__icontains=donor_filter)
+
+        # Apply the filters to the queryset
+        queryset = queryset.filter(filters)
+
+        # Get the sort parameters from the request
+        sort_by = request.query_params.get('sort_by')
+
+        # Apply the sorting to the queryset
+        if sort_by is not None:
+            sort_fields = sort_by.split(',')
+            queryset = queryset.order_by(*sort_fields)
+
+        # Paginate the queryset
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     def check_permissions(self, request):
         self.get_permissions()
@@ -31,16 +76,16 @@ class FoodItemViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return FoodItem.objects.filter(expiry_date__gt=timezone.now(), quantity__gt=0)
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             self.permission_classes = [permissions.AllowAny]
         elif self.action in ['update', 'partial_update']:
             self.permission_classes = [IsOwnerOrAdmin]
+        elif self.action == 'create':
+            if self.request.user.is_authenticated and self.request.user.role == Role.RECEIVER:
+                raise PermissionDenied("Receivers are not allowed to create a food item.")
+            else:
+                self.permission_classes = [IsAuthenticated]
         else:
             self.permission_classes = [IsAuthenticated]
         return super(FoodItemViewSet, self).get_permissions()
@@ -62,15 +107,6 @@ class FoodItemViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        # user = get_user_model().objects.get(id=request.user.id)
-        # location = user.location_set.first()
-        #
-        # if location is not None:
-        #     serializer.save(location=location)
-        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
-        # else:
-        #     return Response({"error": "User has no associated location"}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         user = request.user
