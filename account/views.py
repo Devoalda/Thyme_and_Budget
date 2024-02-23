@@ -103,7 +103,7 @@ class CheckUserStatusView(APIView):
                 "role": serializer.data['role'],
             })
         else:
-            return JsonResponse({"is_logged_in": False})
+            return JsonResponse({"is_logged_in": False}, status=401)
 
 
 class LogoutView(APIView):

@@ -76,7 +76,7 @@ class UserAuthenticationTest(BaseViewTest):
     def test_unauthenticated_user_status(self):
         # Test for unauthenticated user status
         response = self.client.get(reverse('check_user_login'))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json(), {"is_logged_in": False})
 
 
