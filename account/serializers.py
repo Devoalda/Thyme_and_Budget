@@ -83,12 +83,20 @@ class UserListSerializer(serializers.ModelSerializer):
     phone_number = serializers.CharField(required=False)
     first_name = serializers.CharField(required=False)
     last_name = serializers.CharField(required=False)
+    role = serializers.SerializerMethodField()
 
     class Meta:
         model = get_user_model()
         fields = ('username', 'name', 'email', 'phone_number', 'role', 'date_joined', 'created_date', 'modified_date',
                     'first_name', 'last_name')
         read_only_fields = ('date_joined', 'created_date', 'modified_date')
+
+    def get_role(self, obj):
+        if obj.is_superuser:
+            return 'superuser'
+        elif obj.is_staff:
+            return 'admin'
+        return obj.role
 
     def validate(self, data):
         # Check if 'role' or 'username' is in the data

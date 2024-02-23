@@ -96,10 +96,11 @@ class CheckUserStatusView(APIView):
 
     def get(self, request):
         if request.user.is_authenticated:
+            serializer = UserListSerializer(request.user)
             return JsonResponse({
                 "is_logged_in": True,
                 "username": request.user.username,
-                "role": request.user.role,
+                "role": serializer.data['role'],
             })
         else:
             return JsonResponse({"is_logged_in": False})
