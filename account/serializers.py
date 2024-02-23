@@ -68,8 +68,16 @@ class UserLoginSerializer(serializers.Serializer):
 
             update_last_login(None, user)
 
+            # Determine the role of the user
+            if user.is_superuser:
+                role = 'superuser'
+            elif user.is_staff:
+                role = 'admin'
+            else:
+                role = user.role
+
             validation = {'access': access_token, 'refresh': refresh_token, 'username': user.username,
-                          'role'  : user.role, 'id': user.id}
+                          'role'  : role, 'id': user.id}
 
             return validation
         except AuthUser.DoesNotExist:
