@@ -37,6 +37,7 @@ class FoodItemViewSet(viewsets.ModelViewSet):
         name_filter = request.query_params.get('name')
         date_filter = request.query_params.get('expiry_date')
         donor_filter = request.query_params.get('donor')
+        location_filter = request.query_params.get('location')
 
         # Create Q objects for each filter
         filters = Q()
@@ -48,6 +49,8 @@ class FoodItemViewSet(viewsets.ModelViewSet):
             filters |= Q(expiry_date=date_filter)
         if donor_filter is not None:
             filters |= Q(donor__username__icontains=donor_filter)
+        if location_filter is not None:     # Not tested
+            filters |= Q(location__postal_code__icontains=location_filter)
 
         # Apply the filters to the queryset
         queryset = queryset.filter(filters)
@@ -97,8 +100,17 @@ class FoodItemViewSet(viewsets.ModelViewSet):
         # Extract the postal_code from the request data
         postal_code = request.data.get('postal_code')
 
+        # check if the postal_code is in the request data and if it is not empty and it is 6 digits
+        if postal_code is None or postal_code == "" or len(postal_code) != 6:
+            return Response({"Collection Postal Code": ["This field is required and must be 6 digits long."]},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         # Check if a Location with the same postal_code already exists
-        location, created = Location.objects.get_or_create(postal_code=postal_code)
+        try:
+            location, created = Location.objects.get_or_create(postal_code=postal_code)
+        except Exception as e:
+            return Response({"Collection Postal Code": ["Cannot find the address with provided postal code, please "
+                                                        "check again."]}, status=status.HTTP_400_BAD_REQUEST)
 
         # Use the existing or new Location for the FoodItem
         request.data['location'] = location.id
@@ -115,8 +127,17 @@ class FoodItemViewSet(viewsets.ModelViewSet):
         # Extract the postal_code from the request data
         postal_code = request.data.get('postal_code')
 
+        # check if the postal_code is in the request data and if it is not empty and it is 6 digits
+        if postal_code is None or postal_code == "" or len(postal_code) != 6:
+            return Response({"Collection Postal Code": ["This field is required and must be 6 digits long."]},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         # Check if a Location with the same postal_code already exists
-        location, created = Location.objects.get_or_create(postal_code=postal_code)
+        try:
+            location, created = Location.objects.get_or_create(postal_code=postal_code)
+        except Exception as e:
+            return Response({"Collection Postal Code": ["Cannot find the address with provided postal code, please "
+                                                        "check again."]}, status=status.HTTP_400_BAD_REQUEST)
 
         # Use the existing or new Location for the FoodItem
         request.data['location'] = location.id

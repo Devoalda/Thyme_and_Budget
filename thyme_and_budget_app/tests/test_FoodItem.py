@@ -18,6 +18,7 @@ class FoodTests(APITestCase):
         cls.user = User.objects.create_user(username='testuser', password='testpassword', role='donor')
         # cls.location = Location.objects.create(postal_code='12345', donor_id=cls.user.id)
         cls.location = Location.objects.create(postal_code='12345')
+        cls.postal_code = '670656'
         with open('thyme_and_budget_app/tests/test_image.jpg', 'rb') as image_file:
             cls.image = base64.b64encode(image_file.read())  # remove the decode('utf-8') call here
             cls.data = ContentFile(cls.image, name='temp.jpg')  # create a Django ContentFile
@@ -37,7 +38,7 @@ class FoodTests(APITestCase):
 
         # Set up the food data
         self.food_data = {'name': '1234', 'expiry_date': expiry_date_str, 'quantity': 100000, 'image': self.data,
-                          'postal_code': self.location.postal_code, 'donor': self.user.id}
+                          'postal_code': self.postal_code, 'donor': self.user.id}
 
         # Create a FoodItem object
         self.food_item = FoodItem.objects.create(name='1234', expiry_date=expiry_date_str, quantity=100000,
@@ -104,3 +105,17 @@ class FoodTests(APITestCase):
         response = self.client.post(reverse('food-list'), self.food_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['location'], location2.postal_code)
+
+    def test_cannot_create_with_invalid_postal_code(self):
+        self.food_data['image'] = self.image.decode('utf-8')
+        self.food_data['postal_code'] = '123'
+        response = self.client.post(reverse('food-list'), self.food_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['Collection Postal Code'][0], 'This field is required and must be 6 digits long.')
+
+        # postal code that cannot be found
+        self.food_data['postal_code'] = '123456'
+        response = self.client.post(reverse('food-list'), self.food_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['Collection Postal Code'][0], "Cannot find the address with provided postal "
+                                                                     "code, please check again.")
