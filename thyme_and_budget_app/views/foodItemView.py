@@ -3,15 +3,27 @@ from django.utils import timezone
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 
 from account.models import Role
 from ..models import FoodItem, Location
 from ..serializers import FoodItemSerializer
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 
+class CustomPageNumberPagination(PageNumberPagination):
+    def get_paginated_response(self, data):
+        return Response({
+            'links': {
+                'next': self.get_next_link(),
+                'previous': self.get_previous_link()
+            },
+            'current_page': self.page.number,
+            'total_pages': self.page.paginator.num_pages,
+            'total_items': self.page.paginator.count,
+            'results': data
+        })
 
 class IsOwnerOrAdmin(permissions.BasePermission):
     """
@@ -27,7 +39,7 @@ class IsOwnerOrAdmin(permissions.BasePermission):
 class FoodItemViewSet(viewsets.ModelViewSet):
     serializer_class = FoodItemSerializer
     parser_classes = [JSONParser]
-    pagination_class = PageNumberPagination
+    pagination_class = CustomPageNumberPagination
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -62,6 +74,8 @@ class FoodItemViewSet(viewsets.ModelViewSet):
         if sort_by is not None:
             sort_fields = sort_by.split(',')
             queryset = queryset.order_by(*sort_fields)
+        else:
+            queryset = queryset.order_by('id')  # Default ordering
 
         # Paginate the queryset
         page = self.paginate_queryset(queryset)
