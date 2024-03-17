@@ -15,8 +15,10 @@ User = get_user_model()
 class FoodTests(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = User.objects.create_user(username='testuser', password='testpassword')
-        cls.location = Location.objects.create(postal_code='12345', donor_id=cls.user.id)
+        cls.user = User.objects.create_user(username='testuser', password='testpassword', role='donor')
+        # cls.location = Location.objects.create(postal_code='12345', donor_id=cls.user.id)
+        cls.location = Location.objects.create(postal_code='12345')
+        cls.postal_code = '670656'
         with open('thyme_and_budget_app/tests/test_image.jpg', 'rb') as image_file:
             cls.image = base64.b64encode(image_file.read())  # remove the decode('utf-8') call here
             cls.data = ContentFile(cls.image, name='temp.jpg')  # create a Django ContentFile
@@ -35,11 +37,25 @@ class FoodTests(APITestCase):
         expiry_date_str = expiry_date.strftime('%Y-%m-%d')
 
         # Set up the food data
-        self.food_data = {'name': '1234', 'expiry_date': expiry_date_str, 'quantity': 100000, 'image': self.data, }
+        self.food_data = {'name': '1234', 'expiry_date': expiry_date_str, 'quantity': 100000, 'image': self.data,
+                          'postal_code': self.postal_code, 'donor': self.user.id}
 
         # Create a FoodItem object
         self.food_item = FoodItem.objects.create(name='1234', expiry_date=expiry_date_str, quantity=100000,
-                image=self.data, location=self.location)
+                                                 image=self.data, location=self.location, donor=self.user)
+
+    def test_authenticated_user_can_create_food(self):
+        # Modify image to be a base64 string
+        self.food_data['image'] = self.image.decode('utf-8')
+
+        response = self.client.post(reverse('food-list'), self.food_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_unauthenticated_user_cannot_create_food(self):
+        self.client.logout()
+        self.food_data['image'] = self.image.decode('utf-8')
+        response = self.client.post(reverse('food-list'), self.food_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_authenticated_user_can_read_food(self):
         response = self.client.get(reverse('food-detail', kwargs={'pk': self.food_item.pk}))
@@ -58,21 +74,21 @@ class FoodTests(APITestCase):
         response = self.client.delete(reverse('food-detail', kwargs={'pk': self.food_item.pk}))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-    def test_unauthenticated_user_cannot_read_food(self):
+    def test_unauthenticated_user_can_read_all_food(self):
         self.client.logout()
-        response = self.client.get(reverse('food-detail', kwargs={'pk': self.food_item.pk}))
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.get(reverse('food-list'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_unauthenticated_user_cannot_update_food(self):
         self.client.logout()
-        response = self.client.put(reverse('food-detail', kwargs={'pk': self.food_item.pk}), self.food_data,
-                                   format='json')
+        response = self.client.patch(reverse('food-detail', kwargs={'pk': self.food_item.pk}), self.food_data,
+                                     format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_unauthenticated_user_cannot_read_food(self):
+    def test_unauthenticated_user_can_read_food(self):
         self.client.logout()
         response = self.client.get(reverse('food-detail', kwargs={'pk': self.food_item.pk}))
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_cannot_update_non_existent_food(self):
         response = self.client.put(reverse('food-detail', kwargs={'pk': 999}), self.food_data, format='json')
@@ -81,3 +97,25 @@ class FoodTests(APITestCase):
     def test_cannot_delete_non_existent_food(self):
         response = self.client.delete(reverse('food-detail', kwargs={'pk': 999}))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_user_can_add_food_with_another_location(self):
+        location2 = Location.objects.create(postal_code='138683')
+        self.food_data['image'] = self.image.decode('utf-8')
+        self.food_data['postal_code'] = location2.postal_code
+        response = self.client.post(reverse('food-list'), self.food_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['location'], location2.postal_code)
+
+    def test_cannot_create_with_invalid_postal_code(self):
+        self.food_data['image'] = self.image.decode('utf-8')
+        self.food_data['postal_code'] = '123'
+        response = self.client.post(reverse('food-list'), self.food_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['Collection Postal Code'][0], 'This field is required and must be 6 digits long.')
+
+        # postal code that cannot be found
+        self.food_data['postal_code'] = '123456'
+        response = self.client.post(reverse('food-list'), self.food_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['Collection Postal Code'][0], "Cannot find the address with provided postal "
+                                                                     "code, please check again.")

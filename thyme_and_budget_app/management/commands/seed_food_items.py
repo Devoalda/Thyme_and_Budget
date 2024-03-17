@@ -3,11 +3,13 @@ from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from faker import Faker
 from thyme_and_budget_app.models.foodModel import FoodItem
+from django.contrib.auth import get_user_model
 from thyme_and_budget_app.models.locationModel import Location  # replace with the actual path to your models
 
 
 class Command(BaseCommand):
     help = 'Create random food items'
+    User = get_user_model()
 
     def add_arguments(self, parser):
         parser.add_argument('total', type=int, help='Indicates the number of food items to be created')
@@ -35,7 +37,8 @@ class Command(BaseCommand):
                                  # generates a random date between tomorrow and ten years from now
                                  quantity=fake.random_int(min=1, max=100),
                                  # generates a random integer between 1 and 100
-                                 location=location)
+                                 location=location,
+                                 donor=self.User.objects.filter(role='donor').order_by('?').first())
             food_item.image.save(f"{image_name}.jpg",  # Save the image with the name we got earlier
                                  ContentFile(response.content))  # Save the image to the 'image' field
             food_item.save()

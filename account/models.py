@@ -1,3 +1,4 @@
+import uuid
 from enum import Enum
 
 from django.contrib.auth.base_user import BaseUserManager
@@ -19,10 +20,7 @@ class CustomUserManager(BaseUserManager):
         if not password:
             raise ValueError('The Password field must be set')
 
-        user = self.model(
-            username=username,
-            **extra_fields
-        )
+        user = self.model(username=username, **extra_fields)
         user.set_password(password)
         user.save()
         return user
@@ -38,21 +36,22 @@ class CustomUserManager(BaseUserManager):
 
 
 class User(AbstractUser, PermissionsMixin):
-    id = models.AutoField(primary_key=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # rest of your fields...
     username = models.CharField(max_length=100, unique=True)
     name = models.CharField(max_length=100)
     email = models.EmailField(max_length=100)
     phone_number = models.CharField(max_length=100)
     # role = models.CharField(max_length=10, choices=[(role.value, role.name) for role in Role])A
-    role = models.CharField(choices=[(role.value, role.name) for role in Role], blank=True, null=True,
-                            max_length=10, default=Role.DONOR.value)
+    role = models.CharField(choices=[(role.value, role.name) for role in Role], blank=True, null=True, max_length=10,
+                            default=Role.DONOR.value)
     date_joined = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
     created_date = models.DateTimeField(default=timezone.now)
     modified_date = models.DateTimeField(default=timezone.now)
-    created_by = models.EmailField()
-    modified_by = models.EmailField()
+    # created_by = models.EmailField()
+    # modified_by = models.EmailField()
 
     objects = CustomUserManager()
 

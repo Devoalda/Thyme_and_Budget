@@ -1,6 +1,8 @@
 from django.db import models, transaction
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
+
 from .foodModel import FoodItem
+
 
 class Collection(models.Model):
     id = models.AutoField(primary_key=True)
@@ -16,8 +18,9 @@ class Collection(models.Model):
     def save(self, *args, **kwargs):
         with transaction.atomic():
             food_item = FoodItem.objects.select_for_update().get(pk=self.food_item_id)
-            if food_item.quantity < int(self.quantity):
-                raise ValidationError('Not enough quantity in FoodItem')
+            self.quantity = int(self.quantity)
+            if food_item.quantity < self.quantity:
+                raise ValidationError('Food item quantity is less than the collection quantity')
             food_item.quantity -= self.quantity
             food_item.save()
             super().save(*args, **kwargs)
